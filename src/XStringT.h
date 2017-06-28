@@ -617,15 +617,15 @@ private:
 	/**************************
 		Implementation data
 	***************************/
-	size_type	d_cplength;			//!< holds length of string in code points (not including null termination)
-	size_type	d_reserve;			//!< code point reserve size (currently allocated buffer size in code points).
+	size_type			d_cplength;			//!< holds length of string in code points (not including null termination)
+	size_type			d_reserve;			//!< code point reserve size (currently allocated buffer size in code points).
 
 	mutable utf8*		d_encodedbuff;		//!< holds string data encoded as utf8 (generated only by calls to c_str() and data())
 	mutable size_type	d_encodeddatlen;	//!< holds length of encoded data (in case it's smaller than buffer).
 	mutable size_type	d_encodedbufflen;	//!< length of above buffer (since buffer can be bigger then the data it holds to save re-allocations).
 
-	utf32		d_quickbuff[XSTRINGT_STRING_QUICKBUFF_SIZE]; //!< This is a integrated 'quick' buffer to save allocations for smallish strings
-	utf32*		d_buffer;							//!< Pointer the the main buffer memory.  This is only valid when quick-buffer is not being used
+	utf32				d_quickbuff[XSTRINGT_STRING_QUICKBUFF_SIZE]; //!< This is a integrated 'quick' buffer to save allocations for smallish strings
+	utf32*				d_buffer;							//!< Pointer the the main buffer memory.  This is only valid when quick-buffer is not being used
 
 };
 
