@@ -134,6 +134,173 @@ public:
 		init();
 		assign(std_str);
 	}
+	/*!
+	\brief
+		Constructs a new string initialised with characters from the given std::string object.
+
+	\param std_str
+		std::string object used to initialise the newly created string
+
+	\param str_idx
+		Starting character of \a std_str to be used when initialising the new String
+
+	\note
+		The characters of \a std_str are taken to be unencoded data which represent Unicode code points 0x00..0xFF.  No translation of
+		the provided data will occur.
+
+	\param str_num
+		Maximum number of characters from \a std_str that are to be assigned to the new String
+
+	\return
+		Nothing
+
+	\exception std::length_error	Thrown if resulting String object would be too big.
+	*/
+	String(const std::string& std_str, size_type str_idx, size_type str_num = npos)
+	{
+		init();
+		assign(std_str, str_idx, str_num);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// Construction via UTF-8 stream (for straight ASCII use, only codes 0x00 - 0x7f are valid)
+	//////////////////////////////////////////////////////////////////////////
+	/*!
+	\brief
+		Constructs a new String object and initialise it using the provided utf8 encoded string buffer.
+
+	\param utf8_str
+		Pointer to a buffer containing a null-terminated Unicode string encoded as utf8 data.
+
+	\note
+		A basic string literal (cast to utf8*) can be passed to this function, provided that the string is
+		comprised only of code points 0x00..0x7f.  The use of extended ASCII characters (with values >0x7f)
+		would result in incorrect behaviour as the String will attempt to 'decode' the data, with unpredictable
+		results.
+
+	\return
+		Nothing
+
+	\exception std::length_error	Thrown if resulting String object would be too big.
+	*/
+	String(const utf8* utf8_str)
+	{
+		init();
+		assign(utf8_str);
+	}
+
+	/*!
+	\brief
+		Constructs a new String object and initialise it using the provided utf8 encoded string buffer.
+
+		A basic string literal (cast to utf8*) can be passed to this function, provided that the string is
+		comprised only of code points 0x00..0x7f.  The use of extended ASCII characters (with values >0x7f)
+		would result in incorrect behaviour as the String will attempt to 'decode' the data, with unpredictable
+		results.
+
+	\param utf8_str
+		Pointer to a buffer containing Unicode string data encoded as utf8.
+
+	\note
+		A basic string literal (cast to utf8*) can be passed to this function, provided that the string is
+		comprised only of code points 0x00..0x7f.  The use of extended ASCII characters (with values >0x7f)
+		would result in incorrect behaviour as the String will attempt to 'decode' the data, with unpredictable
+		results.
+
+	\param chars_len
+		Length of the provided utf8 string in code units (not code-points).
+
+	\return
+		Nothing
+
+	\exception std::length_error	Thrown if resulting String object would be too big.
+	*/
+	String(const utf8* utf8_str, size_type chars_len)
+	{
+		init();
+		assign(utf8_str, chars_len);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// Construction via c-string
+	//////////////////////////////////////////////////////////////////////////
+	/*!
+	\brief
+		Constructs a new String object and initialise it using the provided c-string.
+
+	\param c_str
+		Pointer to a c-string.
+
+	\return
+		Nothing
+
+	\exception std::length_error	Thrown if resulting String object would be too big.
+	*/
+	String(const char* cstr)
+	{
+		init();
+		assign(cstr);
+	}
+
+	/*!
+	\brief
+		Constructs a new String object and initialise it using characters from the provided char array.
+
+	\param chars
+		char array.
+
+	\param chars_len
+		Number of chars from the array to be used.
+
+	\return
+		Nothing
+
+	\exception std::length_error	Thrown if resulting String object would be too big.
+	*/
+	String(const char* chars, size_type chars_len)
+	{
+		init();
+		assign(chars, chars_len);
+	}
+
+public:
+	/*!
+	\brief
+		Returns the code point at the given index.
+
+	\param idx
+		Zero based index of the code point to be returned.
+
+	\note
+		- For constant strings length()/size() provide a valid index and will access the default utf32 value.
+		- For non-constant strings length()/size() is an invalid index, and acceesing (especially writing) this index could cause string corruption.
+
+	\return
+		The utf32 code point at the given index within the String.
+	*/
+	reference	operator[](size_type idx)
+	{
+		return (ptr()[idx]);
+	}
+
+	/*!
+	\brief
+		Returns the code point at the given index.
+
+	\param idx
+		Zero based index of the code point to be returned.
+
+	\note
+		- For constant strings length()/size() provide a valid index and will access the default utf32 value.
+		- For non-constant strings length()/size() is an invalid index, and acceesing (especially writing) this index could cause string corruption.
+
+	\return
+		The utf32 code point at the given index within the String.
+	*/
+	value_type	operator[](size_type idx) const
+	{
+		return ptr()[idx];
+	}
 
 public:
 	//////////////////////////////////////////////////////////////////////////
