@@ -493,10 +493,10 @@ public:
 
 	\exception std::length_error	Thrown if the resulting String would have been too large.
 	*/
-//	String&	assign(const utf8* utf8_str)
-//	{
-//		return assign(utf8_str, utf_length(utf8_str));
-//	}
+	String&	assign(const utf8* utf8_str)
+	{
+		return assign(utf8_str, utf_length(utf8_str));
+	}
 
 	/*!
 	\brief
@@ -519,20 +519,20 @@ public:
 
 	\exception std::length_error	Thrown if the resulting String would have been too large, or if str_num is 'npos'.
 	*/
-//	String&	assign(const utf8* utf8_str, size_type str_num)
-//	{
-//		if (str_num == npos)
-//		{
-//			XSTRINGT_THROW(std::length_error("Length for utf8 encoded string can not be 'npos'"));
-//		}
-//
-//		size_type enc_sze = encoded_size(utf8_str, str_num);
-//
-//		grow(enc_sze);
-//		encode(utf8_str, ptr(), d_reserve, str_num);
-//		setlen(enc_sze);
-//		return *this;
-//	}
+	String&	assign(const utf8* utf8_str, size_type str_num)
+	{
+		if (str_num == npos)
+		{
+			XSTRINGT_THROW(std::length_error("Length for utf8 encoded string can not be 'npos'"));
+		}
+
+		size_type enc_sze = encoded_size(utf8_str, str_num);
+
+		grow(enc_sze);
+		encode(utf8_str, ptr(), d_reserve, str_num);
+		setlen(enc_sze);
+		return *this;
+	}
 
 	/*!
 	\brief

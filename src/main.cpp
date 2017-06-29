@@ -12,7 +12,7 @@
 //
 int main()
 {
-//	XStringT::String str1(std::string("hello"));
+	XStringT::String str1(std::string("hello"));
 	XStringT::String str2("hello");
 
 	return 0;
