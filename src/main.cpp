@@ -1,4 +1,4 @@
-//============================================================================
+﻿//============================================================================
 // Name        : XStringT.cpp
 // Author      : 
 // Version     :
@@ -6,8 +6,15 @@
 // Description :
 //============================================================================
 
+#if defined(_MSC_VER)
+#include <windows.h>
+#endif 
+
+#include <string>
 #include <iostream>
+
 #include "XStringT.h"
+#include "XStringTranscoderT.h"
 
 //
 int main()
@@ -19,5 +26,13 @@ int main()
 	str1 = str1 + " " + "world";
 	const char* B = str1.c_str();
 
+	XStringT::IconvStringTranscoder tran;
+	XStringT::String str3 = tran.stringFromStringW(std::wstring(L"123456 测试文本"));
+	std::wstring strW = tran.stringToStringW(str3);
+	
+//	str3 = tran.stringFromStringW(std::wstring(L"123456 測試文本"));
+//	str3 = tran.stringFromStringW(std::wstring(L"123456 테스트 텍스트"));
+//	str3 = tran.stringFromStringW(std::wstring(L"123456 テストテキスト"));
+	A = tran.stringToANSI(str3);
 	return 0;
 }

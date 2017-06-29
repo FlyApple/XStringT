@@ -5,8 +5,13 @@
  *      Author: silly
  */
 
+#if defined(_MSC_VER)
+#include <windows.h>
+#endif 
+
 #include "XStringTranscoderT.h"
 
+#include <vector>
 #include <string>
 #include <iconv/iconv.h>
 
@@ -19,10 +24,6 @@ namespace XStringT
 //----------------------------------------------------------------------------//
 class IconvHelper
 {
-    std::string d_fromCode;
-    std::string d_toCode;
-    iconv_t d_cd;
-
 public:
     //------------------------------------------------------------------------//
     IconvHelper(const std::string& tocode, const std::string& fromcode) :
@@ -37,8 +38,7 @@ public:
 		}
     }
 
-    //------------------------------------------------------------------------//
-    ~IconvHelper()
+	virtual ~IconvHelper()
     {
         iconv_close(d_cd);
     }
@@ -47,8 +47,7 @@ public:
     size_t iconv(const char** inbuf, size_t* inbytesleft,
                  char** outbuf, size_t* outbytesleft)
     {
-        return ::iconv(d_cd, const_cast<char**>(inbuf), inbytesleft,
-                       outbuf, outbytesleft);
+        return ::iconv(d_cd, const_cast<char**>(inbuf), inbytesleft, outbuf, outbytesleft);
     }
 
     //------------------------------------------------------------------------//
@@ -56,18 +55,18 @@ public:
     {
         std::string reason;
 
-        if (err == EINVAL)
-            reason = "Incomplete " + d_fromCode + " sequence.";
-        else if (err == EILSEQ)
-            reason = "Invalid " + d_fromCode + " sequence.";
-        else
-            reason = "Unknown error.";
+		if (err == EINVAL){ reason = "Incomplete " + d_fromCode + " sequence."; }
+		else if (err == EILSEQ){ reason = "Invalid " + d_fromCode + " sequence."; }
+		else { reason = "Unknown error."; }
 
         XSTRINGT_THROW(String("Failed to convert from \"") + d_fromCode.c_str() +
             "\" to \"" + d_toCode.c_str() + "\": " + reason.c_str());
     }
 
-    //------------------------------------------------------------------------//
+private:
+	std::string d_fromCode;
+    std::string d_toCode;
+    iconv_t		d_cd;
 };
 
 //----------------------------------------------------------------------------//
@@ -89,17 +88,13 @@ static T* iconvTranscode(IconvHelper& ich, const char* in_buf, size_t in_len)
 
     while (true)
     {
-        char* out_buf =
-            reinterpret_cast<char*>(&out_vec[out_count]);
-        const size_t start_out_bytes_left =
-            (out_vec.size() - out_count) * sizeof(T);
+        char* out_buf = reinterpret_cast<char*>(&out_vec[out_count]);
+        const size_t start_out_bytes_left = (out_vec.size() - out_count) * sizeof(T);
         size_t out_bytes_left = start_out_bytes_left;
 
-        const size_t result = ich.iconv(&in_buf, &in_len,
-                                        &out_buf, &out_bytes_left);
+        const size_t result = ich.iconv(&in_buf, &in_len, &out_buf, &out_bytes_left);
 
-        out_count +=
-            (start_out_bytes_left - out_bytes_left) / sizeof(T);
+        out_count += (start_out_bytes_left - out_bytes_left) / sizeof(T);
 
         if (result != static_cast<size_t>(-1))
         {
@@ -153,19 +148,69 @@ static String_T iconvTranscode(IconvHelper& ich, const char* in_buf, size_t in_l
     return result;
 }
 
-//----------------------------------------------------------------------------//
-// Helper to detect the platform endianess at run time.
-bool is_big_endian(void)
-{
-    union
-    {
-		unsigned int	i;
-        unsigned char	c[4];
-    } bint = {0x01020304};
 
-    return bint.c[0] == 1;
+//----------------------------------------------------------------------------//
+IconvStringTranscoder::IconvStringTranscoder()
+{
+#if defined(_MSC_VER)
+	GetLocaleInfoA(LOCALE_SYSTEM_DEFAULT, LOCALE_ILANGUAGE, (LPSTR)&d_nLanguage, sizeof(d_nLanguage)/sizeof(CHAR));
+	GetLocaleInfoA(LOCALE_SYSTEM_DEFAULT, LOCALE_SENGLANGUAGE, (LPSTR)d_szLanguage, sizeof(d_szLanguage)/sizeof(CHAR) - 1);
+#endif
 }
 
+//----------------------------------------------------------------------------//
+char* IconvStringTranscoder::stringToANSI(const String& input) const
+{
+	IconvHelper ich(ANSIPE(), "UTF-8");
+    return iconvTranscode<char>(ich, input.c_str(), getStringLength(input.c_str()));
+}
+
+utf16* IconvStringTranscoder::stringToUTF16(const String& input) const
+{
+    IconvHelper ich(UTF16PE(), "UTF-8");
+    return iconvTranscode<utf16>(ich, input.c_str(), getStringLength(input.c_str()));
+}
+
+//----------------------------------------------------------------------------//
+std::wstring IconvStringTranscoder::stringToStringW(const String& input) const
+{
+#if defined(_MSC_VER)
+	IconvHelper ich(UTF16PE(), "UTF-8");
+#else
+    IconvHelper ich("WCHAR_T", "UTF-8");
+#endif
+    return iconvTranscode<std::wstring, wchar_t>(ich, input.c_str(), getStringLength(input.c_str()));
+}
+
+//----------------------------------------------------------------------------//
+String IconvStringTranscoder::stringFromUTF16(const utf16* input) const
+{
+#if defined(_MSC_VER)
+    IconvHelper ich("UTF-8", UTF16PE());
+    return iconvTranscode<String, utf8>(ich, reinterpret_cast<const char*>(input), getStringLength(input)*sizeof(utf16));
+#else
+    IconvHelper ich("WCHAR_T", UTF16PE());
+    return stringFromStringW(iconvTranscode<std::wstring, wchar_t>(ich, reinterpret_cast<const char*>(input), getStringLength(input)));
+#endif
+}
+
+//----------------------------------------------------------------------------//
+String IconvStringTranscoder::stringFromStringW(const std::wstring& input) const
+{
+#if defined(_MSC_VER)
+    IconvHelper ich("UTF-8", UTF16PE());
+    return iconvTranscode<String, utf8>(ich, reinterpret_cast<const char*>(input.c_str()), input.length() * sizeof(wchar_t));
+#else
+    IconvHelper ich("WCHAR_T", UTF16PE());
+    return iconvTranscode<String, utf8>(ich, reinterpret_cast<const char*>(input.c_str()), input.length() * sizeof(wchar_t));
+#endif
+}
+
+//----------------------------------------------------------------------------//
+void IconvStringTranscoder::deleteUTF16Buffer(utf16* input) const
+{
+    deleteTranscodeBuffer(input);
+}
 
 
 }
