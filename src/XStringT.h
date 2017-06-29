@@ -346,58 +346,6 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////////////
-	// Construction via std::string
-	//////////////////////////////////////////////////////////////////////////
-	/*!
-	\brief
-		Constructs a new string and initialises it using the std::string std_str
-
-	\param std_str
-		The std::string object that is to be used to initialise the new String object.
-
-	\note
-		The characters of \a std_str are taken to be unencoded data which represent Unicode code points 0x00..0xFF.  No translation of
-		the provided data will occur.
-
-	\return
-		Nothing
-
-	\exception std::length_error	Thrown if resulting String object would be too big.
-	*/
-	String(const std::string& std_str)
-	{
-		init();
-		assign(std_str);
-	}
-	/*!
-	\brief
-		Constructs a new string initialised with characters from the given std::string object.
-
-	\param std_str
-		std::string object used to initialise the newly created string
-
-	\param str_idx
-		Starting character of \a std_str to be used when initialising the new String
-
-	\note
-		The characters of \a std_str are taken to be unencoded data which represent Unicode code points 0x00..0xFF.  No translation of
-		the provided data will occur.
-
-	\param str_num
-		Maximum number of characters from \a std_str that are to be assigned to the new String
-
-	\return
-		Nothing
-
-	\exception std::length_error	Thrown if resulting String object would be too big.
-	*/
-	String(const std::string& std_str, size_type str_idx, size_type str_num = npos)
-	{
-		init();
-		assign(std_str, str_idx, str_num);
-	}
-
-	//////////////////////////////////////////////////////////////////////////
 	// Construction via UTF-8 stream (for straight ASCII use, only codes 0x00 - 0x7f are valid)
 	//////////////////////////////////////////////////////////////////////////
 	/*!
@@ -516,27 +464,6 @@ public:
 
 	/*!
 	\brief
-		Assign the value of std::string \a std_str to this String
-
-	\note
-		The characters of \a std_str are taken to be unencoded data which represent Unicode code points 0x00..0xFF.  No translation of
-		the provided data will occur.
-
-	\param std_str
-		std::string object containing the string value to be assigned.
-
-	\return
-		This String after the assignment has happened
-
-	\exception std::length_error	Thrown if the resulting String would have been too large.
-	*/
-	String&	operator=(const std::string& std_str)
-	{
-		return assign(std_str);
-	}
-
-	/*!
-	\brief
 		Assign to this String the string value represented by the given null-terminated utf8 encoded data
 
 	\note
@@ -590,27 +517,6 @@ public:
 	String&	operator+=(const String& str)
 	{
 		return append(str);
-	}
-
-	/*!
-	\brief
-		Appends the std::string \a std_str
-
-	\param std_str
-		std::string object that is to be appended
-
-	\note
-		The characters of \a std_str are taken to be unencoded data which represent Unicode code points 0x00..0xFF.  No translation of
-		the provided data will occur.
-
-	\return
-		This String after the append operation
-
-	\exception std::length_error	Thrown if resulting String would be too large.
-	*/
-	String&	operator+=(const std::string& std_str)
-	{
-		return append(std_str);
 	}
 
 	/*!
@@ -907,7 +813,7 @@ public:
 	{
 		if (str.d_cplength < str_idx)
 		{
-			XSTRINGT_THROW(std::out_of_range("Index was out of range for XStringT::String object"));
+			XSTRINGT_THROW(std::out_of_range("Index was out of range for XStringT::String::assign() object"));
 		}
 
 		if ((str_num == npos) || (str_num > str.d_cplength - str_idx))
@@ -918,52 +824,6 @@ public:
 		grow(str_num);
 		setlen(str_num);
 		memcpy(ptr(), &str.ptr()[str_idx], str_num * sizeof(utf32));
-
-		return *this;
-	}
-
-	/*!
-	\brief
-		Assign a sub-string of std::string \a std_str to this String
-
-	\note
-		The characters of \a std_str are taken to be unencoded data which represent Unicode code points 0x00..0xFF.  No translation of
-		the provided data will occur.
-
-	\param std_str
-		std::string object containing the string value to be assigned.
-
-	\param str_idx
-		Index of the first character of \a std_str to be assigned
-
-	\param str_num
-		Maximum number of characters from \a std_str to be assigned
-
-	\return
-		This String after the assignment has happened
-
-	\exception std::out_of_range	Thrown if \a str_idx is invalid for \a std_str
-	\exception std::length_error	Thrown if the resulting String would have been too large.
-	*/
-	String&	assign(const std::string& std_str, size_type str_idx = 0, size_type str_num = npos)
-	{
-		if (std_str.size() < str_idx)
-		{
-			XSTRINGT_THROW(std::out_of_range("Index was out of range for std::string object"));
-		}
-
-		if ((str_num == npos) || (str_num > (size_type)std_str.size() - str_idx))
-		{
-			str_num = (size_type)std_str.size() - str_idx;
-		}
-
-		grow(str_num);
-		setlen(str_num);
-
-		while(str_num--)
-		{
-			((*this)[str_num]) = static_cast<utf32>(static_cast<unsigned char>(std_str[str_num + str_idx]));
-		}
 
 		return *this;
 	}
@@ -1248,49 +1108,6 @@ public:
 
 	/*!
 	\brief
-		Appends a sub-string of the std::string \a std_str
-
-	\param std_str
-		std::string object containing data to be appended
-
-	\note
-		The characters of \a std_str are taken to be unencoded data which represent Unicode code points 0x00..0xFF.  No translation of
-		the provided data will occur.
-
-	\param str_idx
-		Index of the first character to be appended
-
-	\param str_num
-		Maximum number of characters to be appended
-
-	\return
-		This String after the append operation
-
-	\exception std::out_of_range	Thrown if \a str_idx is invalid for \a std_str.
-	\exception std::length_error	Thrown if resulting String would be too large.
-	*/
-	String& append(const std::string& std_str, size_type str_idx = 0, size_type str_num = npos)
-	{
-		if (std_str.size() < str_idx)
-			XSTRINGT_THROW(std::out_of_range("Index is out of range for std::string"));
-
-		if ((str_num == npos) || (str_num > (size_type)std_str.size() - str_idx))
-			str_num = (size_type)std_str.size() - str_idx;
-
-		size_type newsze = d_cplength + str_num;
-
-		grow(newsze);
-		utf32* pt = &ptr()[newsze-1];
-
-		while(str_num--)
-			*pt-- = static_cast<utf32>(static_cast<unsigned char>(std_str[str_num]));
-
-		setlen(newsze);
-		return *this;
-	}
-
-	/*!
-	\brief
 		Appends to the String the null-terminated utf8 encoded data in the buffer utf8_str.
 
 	\param utf8_str
@@ -1478,82 +1295,6 @@ public:
 		grow(newsz);
 		memmove(&ptr()[idx + str_num], &ptr()[idx], (d_cplength - idx) * sizeof(utf32));
 		memcpy(&ptr()[idx], &str.ptr()[str_idx], str_num * sizeof(utf32));
-		setlen(newsz);
-
-		return *this;
-	}
-	/*!
-	\brief
-		Inserts the given std::string object at the specified position.
-
-	\param idx
-		Index where the std::string is to be inserted.
-
-	\param std_str
-		std::string object that is to be inserted.
-
-	\note
-		The characters of \a std_str are taken to be unencoded data which represent Unicode code points 0x00..0xFF.  No translation of
-		the provided data will occur.
-
-	\return
-		This String after the insert.
-
-	\exception std::out_of_range	Thrown if \a idx is invalid for this String.
-	\exception std::length_error	Thrown if resulting String would be too large.
-	*/
-	String&	insert(size_type idx, const std::string& std_str)
-	{
-		return insert(idx, std_str, 0, npos);
-	}
-
-	/*!
-	\brief
-		Inserts a sub-string of the given std::string object at the specified position.
-
-	\param idx
-		Index where the string is to be inserted.
-
-	\param std_str
-		std::string object containing data to be inserted.
-
-	\note
-		The characters of \a std_str are taken to be unencoded data which represent Unicode code points 0x00..0xFF.  No translation of
-		the provided data will occur.
-
-	\param str_idx
-		Index of the first character from \a std_str to be inserted.
-
-	\param str_num
-		Maximum number of characters from \a str to be inserted.
-
-	\return
-		This String after the insert.
-
-	\exception std::out_of_range	Thrown if \a idx or \a str_idx are out of range.
-	\exception std::length_error	Thrown if resulting String would be too large.
-	*/
-	String& insert(size_type idx, const std::string& std_str, size_type str_idx, size_type str_num)
-	{
-		if (d_cplength < idx)
-			XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::String"));
-
-		if (std_str.size() < str_idx)
-			XSTRINGT_THROW(std::out_of_range("Index is out of range for std::string"));
-
-		if ((str_num == npos) || (str_num > (size_type)std_str.size() - str_idx))
-			str_num = (size_type)std_str.size() - str_idx;
-
-		size_type newsz = d_cplength + str_num;
-		grow(newsz);
-
-		memmove(&ptr()[idx + str_num], &ptr()[idx], (d_cplength - idx) * sizeof(utf32));
-
-		utf32* pt = &ptr()[idx + str_num - 1];
-
-		while(str_num--)
-			*pt-- = static_cast<utf32>(static_cast<unsigned char>(std_str[str_idx + str_num]));
-
 		setlen(newsz);
 
 		return *this;
@@ -1928,125 +1669,6 @@ public:
 			memmove(&ptr()[idx + str_num], &ptr()[len + idx], (d_cplength - idx - len) * sizeof(utf32));
 
 		memcpy(&ptr()[idx], &str.ptr()[str_idx], str_num * sizeof(utf32));
-		setlen(newsz);
-
-		return *this;
-	}
-
-
-	/*!
-	\brief
-		Replace code points in the String with the specified std::string object
-
-	\param idx
-		Index of the first code point to be replaced
-
-	\param len
-		Maximum number of code points to be replaced (if this is 0, operation is an insert at position \a idx)
-
-	\param std_str
-		The std::string object that is to replace the specified code points
-
-	\note
-		Characters from \a std_str are considered to represent Unicode code points in the range 0x00..0xFF.  No translation of
-		the encountered data is performed.
-
-	\return
-		This String after the replace operation
-
-	\exception std::out_of_range	Thrown if \a idx is invalid for this String
-	\exception std::length_error	Thrown if the resulting String would be too large.
-	*/
-	String& replace(size_type idx, size_type len, const std::string& std_str)
-	{
-		return replace(idx, len, std_str, 0, npos);
-	}
-
-	/*!
-	\brief
-		Replace the code points in the range [beg, end) with the specified std::string object
-
-	\note
-		If \a beg == \a end, the operation is a insert at iterator position \a beg
-
-	\param beg
-		Iterator describing the start of the range to be replaced
-
-	\param end
-		Iterator describing the (exclusive) end of the range to be replaced.
-
-	\param std_str
-		The std::string object that is to replace the specified range of code points
-
-	\note
-		Characters from \a std_str are considered to represent Unicode code points in the range 0x00..0xFF.  No translation of
-		the encountered data is performed.
-
-	\return
-		This String after the replace operation
-
-	\exception std::length_error	Thrown if the resulting String would be too large.
-	*/
-	String& replace(iterator iter_beg, iterator iter_end, const std::string& std_str)
-	{
-		return replace(safe_iter_dif(iter_beg, begin()), safe_iter_dif(iter_end, iter_beg), std_str, 0, npos);
-	}
-
-	/*!
-	\brief
-		Replace code points in the String with a specified sub-string of a given std::string object.
-
-	\param idx
-		Index of the first code point to be replaced
-
-	\param len
-		Maximum number of code points to be replaced.  If this is 0, the operation is an insert at position \a idx.
-
-	\param std_str
-		std::string object containing the data that will replace the specified range of code points
-
-	\note
-		Characters from \a std_str are considered to represent Unicode code points in the range 0x00..0xFF.  No translation of
-		the encountered data is performed.
-
-	\param str_idx
-		Index of the first code point of \a std_str that is to replace the specified code point range
-
-	\param str_num
-		Maximum number of code points of \a std_str that are to replace the specified code point range
-
-	\return
-		This String after the replace operation
-
-	\exception std::out_of_range	Thrown if either \a idx, or \a str_idx are invalid
-	\exception std::length_error	Thrown if the resulting String would have been too large.
-	*/
-	String& replace(size_type idx, size_type len, const std::string& std_str, size_type str_idx, size_type str_num)
-	{
-		if (d_cplength < idx)
-			XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::String"));
-
-		if (std_str.size() < str_idx)
-			XSTRINGT_THROW(std::out_of_range("Index is out of range for std::string"));
-
-		if (((str_idx + str_num) > std_str.size()) || (str_num == npos))
-			str_num = (size_type)std_str.size() - str_idx;
-
-		if (((len + idx) > d_cplength) || (len == npos))
-			len = d_cplength - idx;
-
-		size_type newsz = d_cplength + str_num - len;
-
-		grow(newsz);
-
-		if ((idx + len) < d_cplength)
-			memmove(&ptr()[idx + str_num], &ptr()[len + idx], (d_cplength - idx - len) * sizeof(utf32));
-
-		utf32* pt = &ptr()[idx + str_num - 1];
-
-		while (str_num--)
-			*pt-- = static_cast<utf32>(static_cast<unsigned char>(std_str[str_idx + str_num]));
-
 		setlen(newsz);
 
 		return *this;
@@ -2502,40 +2124,6 @@ private:
 \exception std::length_error	Thrown if the resulting String would be too large.
 */
 String	operator+(const String& str1, const String& str2);
-
-/*!
-\brief
-	Return String object that is the concatenation of the given inputs
-
-\param str
-	String object describing first part of the new string
-
-\param std_str
-	std::string object describing the second part of the new string
-
-\return
-	A String object that is the concatenation of \a str and \a std_str
-
-\exception std::length_error	Thrown if the resulting String would be too large.
-*/
-String operator+(const String& str, const std::string& std_str);
-
-/*!
-\brief
-	Return String object that is the concatenation of the given inputs
-
-\param std_str
-	std::string object describing the first part of the new string
-
-\param str
-	String object describing the second part of the new string
-
-\return
-	A String object that is the concatenation of \a std_str and \a str
-
-\exception std::length_error	Thrown if the resulting String would be too large.
-*/
-String operator+(const std::string& std_str, const String& str);
 
 /*!
 \brief

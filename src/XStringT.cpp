@@ -305,20 +305,6 @@ String	operator+(const String& str1, const String& str2)
 	return temp;
 }
 
-String	operator+(const String& str, const std::string& std_str)
-{
-	String temp(str);
-	temp.append(std_str);
-	return temp;
-}
-
-String	operator+(const std::string& std_str, const String& str)
-{
-	String temp(std_str);
-	temp.append(str);
-	return temp;
-}
-
 String	operator+(const String& str, const utf8* utf8_str)
 {
 	String temp(str);
