@@ -52,3 +52,5 @@ Temporary Items
 *.exp
 *.ilk
 *.opensdf
+/Debug
+/src/Debug
