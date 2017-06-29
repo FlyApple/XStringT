@@ -120,7 +120,7 @@ private:
 #if defined(_MSC_VER)
 	unsigned long	d_nLanguage;
 	char			d_szLanguage[LOCALE_NAME_MAX_LENGTH+1];
-	__inline char* ANSIPE(void)		const 
+	__inline const char* ANSIPE(void)		const
 	{
 		switch (d_nLanguage)
 		{
@@ -132,11 +132,11 @@ private:
 		return "MS-ANSI";
 	}
 #else
-	__inline char* ANSIPE(void)		const { return "UTF-8"; }
+	__inline const char* ANSIPE(void)		const { return "UTF-8"; }
 #endif
 
-	__inline char* UTF16PE(void)	const { return is_big_endian() ? "UTF-16BE" : "UTF-16LE"; };
-	__inline char* UTF32PE(void)	const { return is_big_endian() ? "UTF-32BE" : "UTF-32LE"; };
+	__inline const char* UTF16PE(void)	const { return is_big_endian() ? "UTF-16BE" : "UTF-16LE"; };
+	__inline const char* UTF32PE(void)	const { return is_big_endian() ? "UTF-32BE" : "UTF-32LE"; };
 
 	// Helper to detect the platform endianess at run time.
 	__inline bool is_big_endian(void) const
