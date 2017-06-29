@@ -21,9 +21,15 @@
     <ClCompile Include="XStringT.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="XStringTranscoderT.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="XStringT.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="XStringTranscoderT.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
