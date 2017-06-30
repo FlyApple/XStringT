@@ -4,16 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/XStringBaseT.cpp \
 ../src/XStringT.cpp \
 ../src/XStringTranscoderT.cpp \
 ../src/main.cpp 
 
 OBJS += \
+./src/XStringBaseT.o \
 ./src/XStringT.o \
 ./src/XStringTranscoderT.o \
 ./src/main.o 
 
 CPP_DEPS += \
+./src/XStringBaseT.d \
 ./src/XStringT.d \
 ./src/XStringTranscoderT.d \
 ./src/main.d 

@@ -19,7 +19,8 @@
 //
 int main()
 {
-//	XStringT::String str2("hello");
+	XStringT::StringU8 str;
+	str.ptr();
 
 	const char* A = NULL;
 	const wchar_t* B = NULL;

@@ -12,39 +12,11 @@
 #include <stdexcept>
 #include <iostream>
 
+#include "XStringBaseT.h"
+
 //
 namespace XStringT
 {
-/*-----------------------------------------------------
-Basic Types
--------------------------------------------------------*/
-typedef		unsigned char	utf8;
-typedef		unsigned short	utf16; 
-typedef		unsigned int	utf32;
-
-//
-#ifndef XSTRINGT_NEW_PT
-#   define XSTRINGT_NEW_PT(T) 						new T
-#endif
-#ifndef XSTRINGT_DELETE_PT
-#   define XSTRINGT_DELETE_PT(ptr, T) 				delete ptr
-#endif
-#ifndef XSTRINGT_NEW_ARRAY_PT
-#   define XSTRINGT_NEW_ARRAY_PT(T, count) 			new T[count]
-#endif
-#ifndef XSTRINGT_DELETE_ARRAY_PT
-#   define XSTRINGT_DELETE_ARRAY_PT(ptr, T, count) 	delete [] ptr
-#endif
-
-#ifndef XSTRINGT_THROW
-#   define XSTRINGT_THROW(e) throw e
-#endif
-#ifndef XSTRINGT_RETHROW
-#   define XSTRINGT_RETHROW throw
-#endif
-
-//
-#define XSTRINGT_STRING_QUICKBUFF_SIZE 		(64)
 
 /*-----------------------------------------------------
 String Class
@@ -440,12 +412,12 @@ public:
 
 	utf32*	ptr(void)
 	{
-		return (d_reserve > XSTRINGT_STRING_QUICKBUFF_SIZE) ? d_buffer : d_quickbuff;
+		return (d_reserve > XSTRINGT_STRING_QUICKBUFF_SIZE) ? d_buffer : d_quickbuffer;
 	}
 
 	const utf32*	ptr(void) const
 	{
-		return (d_reserve > XSTRINGT_STRING_QUICKBUFF_SIZE) ? d_buffer : d_quickbuff;
+		return (d_reserve > XSTRINGT_STRING_QUICKBUFF_SIZE) ? d_buffer : d_quickbuffer;
 	}
 
 	size_type	copy(utf8* buf, size_type len = npos, size_type idx = 0) const
@@ -520,9 +492,9 @@ public:
 		{
 			utf32		temp_qbf[XSTRINGT_STRING_QUICKBUFF_SIZE];
 
-			memcpy(temp_qbf, d_quickbuff, XSTRINGT_STRING_QUICKBUFF_SIZE* sizeof(utf32));
-			memcpy(d_quickbuff, str.d_quickbuff, XSTRINGT_STRING_QUICKBUFF_SIZE * sizeof(utf32));
-			memcpy(str.d_quickbuff, temp_qbf, XSTRINGT_STRING_QUICKBUFF_SIZE * sizeof(utf32));
+			memcpy(temp_qbf, d_quickbuffer, XSTRINGT_STRING_QUICKBUFF_SIZE* sizeof(utf32));
+			memcpy(d_quickbuffer, str.d_quickbuffer, XSTRINGT_STRING_QUICKBUFF_SIZE * sizeof(utf32));
+			memcpy(str.d_quickbuffer, temp_qbf, XSTRINGT_STRING_QUICKBUFF_SIZE * sizeof(utf32));
 		}
 
 	}
@@ -833,9 +805,9 @@ public:
 		return String(*this, idx, len);
 	}
 
-private:
+protected:
 	// initialise string object
-	void	init(void)
+	virtual void	init(void)
 	{
 		d_reserve			= XSTRINGT_STRING_QUICKBUFF_SIZE;
 		d_encodedbuff		= 0;
@@ -846,7 +818,7 @@ private:
 	}
 
 	// set the length of the string, and terminate it, according to the given value (will not re-allocate, use grow() first).
-	void	setlen(size_type len)
+	virtual void	setlen(size_type len)
 	{
 		d_cplength = len;
 		ptr()[len] = (utf32)(0);
@@ -920,7 +892,7 @@ private:
 	mutable size_type	d_encodeddatlen;	//!< holds length of encoded data (in case it's smaller than buffer).
 	mutable size_type	d_encodedbufflen;	//!< length of above buffer (since buffer can be bigger then the data it holds to save re-allocations).
 
-	utf32				d_quickbuff[XSTRINGT_STRING_QUICKBUFF_SIZE]; //!< This is a integrated 'quick' buffer to save allocations for smallish strings
+	utf32				d_quickbuffer[XSTRINGT_STRING_QUICKBUFF_SIZE]; //!< This is a integrated 'quick' buffer to save allocations for smallish strings
 	utf32*				d_buffer;							//!< Pointer the the main buffer memory.  This is only valid when quick-buffer is not being used
 
 };
@@ -931,6 +903,125 @@ private:
 String	operator+(const String& str1, const String& str2);
 String	operator+(const String& str, const utf8* utf8_str);
 String	operator+(const utf8* utf8_str, const String& str);
+
+/*-----------------------------------------------------
+StringU32 Class
+-------------------------------------------------------*/
+class StringU32 : public StringBaseU32
+{
+public:
+	friend class StringU8;
+
+public:
+	StringU32();
+	virtual ~StringU32();
+
+public:
+	StringU32&	assign(const utf8* utf8_str)
+	{
+		return assign(utf8_str, total_length(utf8_str));
+	}
+
+	StringU32&	assign(const utf8* utf8_str, size_type str_num)
+	{
+		if (str_num == npos)
+		{ XSTRINGT_THROW(std::length_error("Length for utf8 encoded string can not be 'npos'.")); }
+
+		size_type enc_sze = encoded_size(utf8_str, str_num);
+
+		grow(enc_sze);
+		encode(utf8_str, ptr(), d_reserve, str_num);
+		setlen(enc_sze);
+		return *this;
+	}
+
+protected:
+	// return number of utf32 code units required to re-encode given utf8 data as utf32.  return does not include terminating null.
+	size_type encoded_size(const utf8* buf) const;
+	// return number of utf32 code units required to re-encode given utf8 data as utf32.  len is number of code units in 'buf'.
+	size_type encoded_size(const utf8* buf, size_type len) const;
+	// encoding functions
+	// for all:
+	//	src_len is in code units, or 0 for null terminated string.
+	//	dest_len is in code units.
+	//	returns number of code units put into dest buffer.
+	size_type encode(const utf8* src, utf32* dest, size_type dest_len, size_type src_len = 0) const;
+
+	// return number of code units in a null terminated string
+	__inline size_type total_length(const utf8* utf8_str) const
+	{
+		size_type cnt = 0; while (*utf8_str++){ cnt++; }
+		return cnt;
+	}
+};
+
+/*-----------------------------------------------------
+StringU8 Class
+-------------------------------------------------------*/
+class StringU8 : public StringBaseU8
+{
+public:
+	StringU8();
+	virtual ~StringU8();
+
+	//////////////////////////////////////////////////////////////////////////
+	// Construction via XStringT::StringU8
+	//////////////////////////////////////////////////////////////////////////
+	StringU8(const StringU8& str)
+	{
+		init();
+		assign(str);
+	}
+
+	StringU8(const StringU8& str, size_type str_idx, size_type str_num = npos)
+	{
+		init();
+		assign(str, str_idx, str_num);
+	}
+
+	StringU8(const utf8* utf8_str)
+	{
+		init();
+		assign(utf8_str);
+	}
+
+	StringU8(const utf8* utf8_str, size_type chars_len)
+	{
+		init();
+		assign(utf8_str, chars_len);
+	}
+
+public:
+	StringU8&	assign(const StringU8& str, size_type str_idx = 0, size_type str_num = npos)
+	{
+		StringBaseU8::assign(str, str_idx, str_num);
+
+		d_stringU32.assign(this->ptr());
+		return *this;
+	}
+
+	StringU8&	assign(const utf8* utf8_str)
+	{
+		return assign(utf8_str, total_length(utf8_str));
+	}
+
+	StringU8&	assign(const utf8* utf8_str, size_type str_num)
+	{
+		StringBaseU8::assign(utf8_str, str_num);
+
+		d_stringU32.assign(this->ptr());
+		return *this;
+	}
+protected:
+	virtual void	init(void)
+	{
+		d_stringU32.init();
+
+		StringBaseU8::init();
+	}
+protected:
+	StringU32		d_stringU32;
+};
 
 };//namespace XStringT
 
