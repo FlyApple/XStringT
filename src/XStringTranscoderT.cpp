@@ -33,8 +33,7 @@ public:
     {
         if (d_cd == reinterpret_cast<iconv_t>(-1))
 		{
-            XSTRINGT_THROW(String("Failed to create conversion descriptor from \"") +
-                d_fromCode.c_str() + "\" to \"" + d_toCode.c_str() + "\".");
+            XSTRINGT_THROW("Failed to create conversion descriptor from \"" + d_fromCode + "\" to \"" + d_toCode + "\".");
 		}
     }
 
@@ -59,8 +58,7 @@ public:
 		else if (err == EILSEQ){ reason = "Invalid " + d_fromCode + " sequence."; }
 		else { reason = "Unknown error."; }
 
-        XSTRINGT_THROW(String("Failed to convert from \"") + d_fromCode.c_str() +
-            "\" to \"" + d_toCode.c_str() + "\": " + reason.c_str());
+        XSTRINGT_THROW("Failed to convert from \"" + d_fromCode + "\" to \"" + d_toCode + "\": " + reason);
     }
 
 private:
@@ -72,7 +70,7 @@ private:
 //----------------------------------------------------------------------------//
 // Helper to use iconv to perform some transcode operation.
 template<typename T>
-static T* iconvTranscode(IconvHelper& ich, const char* in_buf, size_t in_len)
+static T* iconvTranscode(IconvHelper& ich, const utf8* in_buf, size_t in_len)
 {
     // Handle empty strings
     if (in_len == 0)
@@ -92,7 +90,7 @@ static T* iconvTranscode(IconvHelper& ich, const char* in_buf, size_t in_len)
         const size_t start_out_bytes_left = (out_vec.size() - out_count) * sizeof(T);
         size_t out_bytes_left = start_out_bytes_left;
 
-        const size_t result = ich.iconv(&in_buf, &in_len, &out_buf, &out_bytes_left);
+        const size_t result = ich.iconv((const char**)&in_buf, &in_len, &out_buf, &out_bytes_left);
 
         out_count += (start_out_bytes_left - out_bytes_left) / sizeof(T);
 
@@ -110,7 +108,9 @@ static T* iconvTranscode(IconvHelper& ich, const char* in_buf, size_t in_len)
         out_vec.resize(out_vec.size() + 8); // this is some arbitrary number
     }
 
+#if defined(DEBUG) || defined(_DEBUG)
     ich.throwErrorException(errno);
+#endif
 
     // this is there mostly to silence compiler warnings, this code should
     // never be executed
@@ -139,12 +139,11 @@ static void deleteTranscodeBuffer(T* buffer)
 //----------------------------------------------------------------------------//
 // Helper to transcode a buffer and return a string class built from it.
 template<typename String_T, typename CodeUnit_T>
-static String_T iconvTranscode(IconvHelper& ich, const char* in_buf, size_t in_len)
+static String_T iconvTranscode(IconvHelper& ich, const utf8* in_buf, size_t in_len)
 {
     CodeUnit_T* tmp = iconvTranscode<CodeUnit_T>(ich, in_buf, in_len);
     String_T result(tmp);
     deleteTranscodeBuffer(tmp);
-
     return result;
 }
 
@@ -161,14 +160,30 @@ IconvStringTranscoder::IconvStringTranscoder()
 //----------------------------------------------------------------------------//
 char* IconvStringTranscoder::stringToANSI(const String& input) const
 {
-	IconvHelper ich(ANSIPE(), "UTF-8");
-    return iconvTranscode<char>(ich, input.c_str(), getStringLength(input.c_str()));
+	const utf8* data = input.data();
+	int length = strlen((const char*)data);
+
+#if defined(_MSC_VER)
+	int lengthW = MultiByteToWideChar(CP_UTF8, 0, (const char*)data, length, NULL, -1);
+	utf16* dataW = XSTRINGT_NEW_ARRAY_PT(utf16, lengthW + 1);
+	MultiByteToWideChar(CP_UTF8, 0, (const char*)data, length, (wchar_t*)dataW, lengthW);
+	int lengthA = WideCharToMultiByte(CP_ACP, 0, (wchar_t*)dataW, lengthW, NULL, -1, NULL, NULL);
+	char* result = XSTRINGT_NEW_ARRAY_PT(char, lengthA + 1);
+	WideCharToMultiByte(CP_ACP, 0, (wchar_t*)dataW, lengthW, result, lengthA, NULL, NULL);
+	result[lengthA] = (char)0;
+	XSTRINGT_DELETE_ARRAY_PT(dataW, utf16, lengthW+1);
+#else
+	utf8* result = XSTRINGT_NEW_ARRAY_PT(utf8, length + 1);
+	input.copy(result);
+	result[length] = (utf8)(0);
+#endif
+	return (char*)result;
 }
 
 utf16* IconvStringTranscoder::stringToUTF16(const String& input) const
 {
     IconvHelper ich(UTF16PE(), "UTF-8");
-    return iconvTranscode<utf16>(ich, input.c_str(), getStringLength(input.c_str()));
+	return iconvTranscode<utf16>(ich, input.data(), getStringLength(input.data()));
 }
 
 //----------------------------------------------------------------------------//
@@ -179,7 +194,7 @@ std::wstring IconvStringTranscoder::stringToStringW(const String& input) const
 #else
     IconvHelper ich("WCHAR_T", "UTF-8");
 #endif
-    return iconvTranscode<std::wstring, wchar_t>(ich, input.c_str(), getStringLength(input.c_str()));
+	return iconvTranscode<std::wstring, wchar_t>(ich, input.data(), getStringLength(input.data()));
 }
 
 //----------------------------------------------------------------------------//
@@ -187,10 +202,10 @@ String IconvStringTranscoder::stringFromUTF16(const utf16* input) const
 {
 #if defined(_MSC_VER)
     IconvHelper ich("UTF-8", UTF16PE());
-    return iconvTranscode<String, utf8>(ich, reinterpret_cast<const char*>(input), getStringLength(input)*sizeof(utf16));
+    return iconvTranscode<String, utf8>(ich, reinterpret_cast<const utf8*>(input), getStringLength(input)*sizeof(utf16));
 #else
     IconvHelper ich("WCHAR_T", UTF16PE());
-    return stringFromStringW(iconvTranscode<std::wstring, wchar_t>(ich, reinterpret_cast<const char*>(input), getStringLength(input)));
+    return stringFromStringW(iconvTranscode<std::wstring, wchar_t>(ich, reinterpret_cast<const utf8*>(input), getStringLength(input)));
 #endif
 }
 
@@ -199,10 +214,10 @@ String IconvStringTranscoder::stringFromStringW(const std::wstring& input) const
 {
 #if defined(_MSC_VER)
     IconvHelper ich("UTF-8", UTF16PE());
-    return iconvTranscode<String, utf8>(ich, reinterpret_cast<const char*>(input.c_str()), input.length() * sizeof(wchar_t));
+    return iconvTranscode<String, utf8>(ich, reinterpret_cast<const utf8*>(input.c_str()), input.length() * sizeof(wchar_t));
 #else
     IconvHelper ich("WCHAR_T", UTF16PE());
-    return iconvTranscode<String, utf8>(ich, reinterpret_cast<const char*>(input.c_str()), input.length() * sizeof(wchar_t));
+    return iconvTranscode<String, utf8>(ich, reinterpret_cast<const utf8*>(input.c_str()), input.length() * sizeof(wchar_t));
 #endif
 }
 

@@ -101,7 +101,7 @@ String::size_type String::encode(const utf32* src, utf8* dest, size_type dest_le
 	// count length for null terminated source...
 	if (src_len == 0)
 	{
-		src_len = utf_length(src);
+		src_len = total_utf_length(src);
 	}
 
 	size_type destCapacity = dest_len;
@@ -154,7 +154,7 @@ String::size_type String::encode(const utf8* src, utf32* dest, size_type dest_le
 	// count length for null terminated source...
 	if (src_len == 0)
 	{
-		src_len = utf_length(src);
+		src_len = total_utf_length(src);
 	}
 
 	size_type destCapacity = dest_len;
@@ -197,37 +197,29 @@ String::size_type String::encode(const utf8* src, utf32* dest, size_type dest_le
 
 String::size_type String::encoded_size(utf32 code_point) const
 {
-	if (code_point < 0x80)
-		return 1;
-	else if (code_point < 0x0800)
-		return 2;
-	else if (code_point < 0x10000)
-		return 3;
-	else
-		return 4;
+	if (code_point < 0x80){ return 1; }
+	else if (code_point < 0x0800){ return 2; }
+	else if (code_point < 0x10000){ return 3; }
+	
+	return 4;
 }
 
 String::size_type String::encoded_size(const utf32* buf) const
 {
-	return encoded_size(buf, utf_length(buf));
+	return encoded_size(buf, total_utf_length(buf));
 }
 
 String::size_type String::encoded_size(const utf32* buf, size_type len) const
 {
 	size_type count = 0;
-
-	while (len--)
-	{
-		count += encoded_size(*buf++);
-	}
-
+	while (len--){ count += encoded_size(*buf++); }
 	return count;
 }
 
 // return number of utf32 code units required to re-encode given utf8 data as utf32.  return does not include terminating null.
 String::size_type String::encoded_size(const utf8* buf) const
 {
-	return encoded_size(buf, utf_length(buf));
+	return encoded_size(buf, total_utf_length(buf));
 }
 
 // return number of utf32 code units required to re-encode given utf8 data as utf32.  len is number of code units in 'buf'.
@@ -238,49 +230,30 @@ String::size_type String::encoded_size(const utf8* buf, size_type len) const
 
 	while (len--)
 	{
-		tcp = *buf++;
-		++count;
+		tcp = *buf++; ++count;
+
 		size_type size = 0;
+		if (tcp < 0x80){ }
+		else if (tcp < 0xE0){ size = 1; buf += 1; }
+		else if (tcp < 0xF0){ size = 2; buf += 2; }
+		else{ size = 3; buf += 3; }
 
-		if (tcp < 0x80)
-		{
-		}
-		else if (tcp < 0xE0)
-		{
-			size = 1;
-			++buf;
-		}
-		else if (tcp < 0xF0)
-		{
-			size = 2;
-			buf += 2;
-		}
-		else
-		{
-			size = 3;
-			buf += 3;
-		}
-
-		if (len >= size)
-			len -= size;
-		else 
-			break;
+		if (len >= size){ len -= size; }
+		else{ break; }
 	}
 
 	return count;
 }
 
 // build an internal buffer with the string encoded as utf8 (remains valid until string is modified).
-utf8* String::build_utf8_buff(void) const
+utf8* String::build_utf8_buffer(void) const
 {
     size_type buffsize = encoded_size(ptr(), d_cplength) + 1;
 
-    if (buffsize > d_encodedbufflen) {
-
+    if (buffsize > d_encodedbufflen) 
+	{
         if (d_encodedbufflen > 0)
-        {
-            XSTRINGT_DELETE_ARRAY_PT(d_encodedbuff, utf8, d_encodedbufflen);
-        }
+        { XSTRINGT_DELETE_ARRAY_PT(d_encodedbuff, utf8, d_encodedbufflen); }
 
         d_encodedbuff = XSTRINGT_NEW_ARRAY_PT(utf8, buffsize);
         d_encodedbufflen = buffsize;
@@ -317,20 +290,6 @@ String	operator+(const utf8* utf8_str, const String& str)
 	String temp(utf8_str);
 	temp.append(str);
 	return temp;
-}
-
-String operator+(const String& str, const char* c_str)
-{
-	String tmp(str);
-	tmp.append(c_str);
-	return tmp;
-}
-
-String operator+(const char* c_str, const String& str)
-{
-	String tmp(c_str);
-	tmp.append(str);
-	return tmp;
 }
 
 }

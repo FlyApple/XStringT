@@ -120,19 +120,6 @@ private:
 #if defined(_MSC_VER)
 	unsigned long	d_nLanguage;
 	char			d_szLanguage[LOCALE_NAME_MAX_LENGTH+1];
-	__inline const char* ANSIPE(void)		const
-	{
-		switch (d_nLanguage)
-		{
-		case 0x34303830:{ return "GBK"; }				//0804 "CHS"
-		case 0x34303430:{ return "BIG5"; }				//0404 "CHT"
-		case 0x31313030:{ return "SHIFT-JIS"; }			//0011 "JPN"
-		case 0x32313030:{ return "KSC_5601"; }			//0012 "KOR"
-		}
-		return "MS-ANSI";
-	}
-#else
-	__inline const char* ANSIPE(void)		const { return "UTF-8"; }
 #endif
 
 	__inline const char* UTF16PE(void)	const { return is_big_endian() ? "UTF-16BE" : "UTF-16LE"; };
