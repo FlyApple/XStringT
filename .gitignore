@@ -53,4 +53,6 @@ Temporary Items
 *.ilk
 *.opensdf
 /Debug
+/Release
 /src/Debug
+/src/Release
