@@ -44,7 +44,8 @@ typedef		unsigned int	utf32;
 #endif
 
 //
-#define XSTRINGT_STRING_QUICKBUFF_SIZE 		(64)
+#define XSTRINGT_STRING_MAXBYTES_SIZE			(1048575)
+#define XSTRINGT_STRING_QUICKBUFFER_SIZE 		(64)
 
 /*-----------------------------------------------------
 StringBase Class
@@ -61,9 +62,10 @@ public:
 	virtual ~StringBase(){ }
 };
 
-template <typename _TU>
+template <class _TC, typename _TU>
 class StringBaseT : public StringBase
 {
+	friend _TC;
 public:
 	//*************************
 	//	Integral Types
@@ -244,20 +246,22 @@ public:
 	StringBaseT(){ init(); }
 	virtual ~StringBaseT()
 	{
-		if (d_reserve > XSTRINGT_STRING_QUICKBUFF_SIZE)
+		if (d_reserve > XSTRINGT_STRING_QUICKBUFFER_SIZE)
 		{ delete[] d_buffer; d_buffer = NULL; }
 	}
 
-	value_type*			ptr(void){ return (d_reserve > XSTRINGT_STRING_QUICKBUFF_SIZE) ? d_buffer : d_quickbuffer; }
-	const value_type*	ptr(void) const{ return (d_reserve > XSTRINGT_STRING_QUICKBUFF_SIZE) ? d_buffer : d_quickbuffer; }
+	value_type*			ptr(void){ return (d_reserve > XSTRINGT_STRING_QUICKBUFFER_SIZE) ? d_buffer : d_quickbuffer; }
+	const value_type*	ptr(void) const{ return (d_reserve > XSTRINGT_STRING_QUICKBUFFER_SIZE) ? d_buffer : d_quickbuffer; }
 
 public:
 	//////////////////////////////////////////////////////////////////////////
 	// Size operations
 	//////////////////////////////////////////////////////////////////////////
-	size_type	size(void) const { return d_cplength; }
-	size_type 	max_size(void) const { return (((size_type)-1) / sizeof(_TU)); }
-	bool		empty(void) const { return (d_cplength == 0); }
+	size_type	size(void) const		{ return d_cplength * sizeof(value_type); }
+	size_type 	max_size(void) const	{ return XSTRINGT_STRING_MAXBYTES_SIZE; }
+	size_type	length(void) const		{ return d_cplength; }
+	size_type 	max_length(void) const	{ return XSTRINGT_STRING_MAXBYTES_SIZE / sizeof(value_type); }
+	bool		empty(void) const		{ return (d_cplength == 0); }
 
 	//////////////////////////////////////////////////////////////////////////
 	// Capacity Operations
@@ -344,7 +348,7 @@ public:
 		{ return *this; }
 
 		if (d_cplength <= idx)
-		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::String::erase().")); }
+		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringBaseT::erase().")); }
 
 		if (len == npos)
 		{ len = d_cplength - idx; }
@@ -373,9 +377,7 @@ public:
 	StringBaseT&	assign(const StringBaseT& str, size_type str_idx = 0, size_type str_num = npos)
 	{
 		if (str.d_cplength < str_idx)
-		{
-			XSTRINGT_THROW(std::out_of_range("Index was out of range for XStringT::String::assign() object."));
-		}
+		{ XSTRINGT_THROW(std::out_of_range("Index was out of range for XStringT::StringBaseT::assign() object.")); }
 
 		if ((str_num == npos) || (str_num > str.d_cplength - str_idx))
 		{ str_num = str.d_cplength - str_idx; }
@@ -391,20 +393,56 @@ public:
 		return assign(str, total_length(str));
 	}
 
-	StringBaseT&	assign(const value_type* str, size_type num)
+	StringBaseT&	assign(const value_type* str, size_type str_num)
 	{
-		if (num == npos)
+		if (str_num == npos)
 		{ XSTRINGT_THROW(std::length_error("Length for string can not be 'npos'.")); }
 
-		grow(num);
-		setlen(num);
-		memcpy(ptr(), str, num * sizeof(value_type));
+		if (str_num >= max_length())
+		{ XSTRINGT_THROW(std::length_error("Length for string can not be 'max_size'.")); }
+
+		grow(str_num);
+		setlen(str_num);
+		memcpy(ptr(), str, str_num * sizeof(value_type));
+		return *this;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// Appending Functions
+	//////////////////////////////////////////////////////////////////////////
+	StringBaseT& append(const StringBaseT& str, size_type str_idx = 0, size_type str_num = npos)
+	{
+		if (str.d_cplength < str_idx)
+		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringBaseT::append().")); }
+
+		if ((str_num == npos) || (str_num > str.d_cplength - str_idx))
+		{ str_num = str.d_cplength - str_idx; }
+
+		grow(d_cplength + str_num);
+		memcpy(&ptr()[d_cplength], &str.ptr()[str_idx], str_num * sizeof(value_type));
+		setlen(d_cplength + str_num);
+		return *this;
+	}
+
+
+	StringBaseT& append(const value_type* str, size_type len)
+	{
+		if (len == npos)
+		{ XSTRINGT_THROW(std::length_error("Length for utf8 encoded string can not be 'npos'.")); }
+
+		size_type newsz = d_cplength + len;
+		if (newsz >= max_length())
+		{ XSTRINGT_THROW(std::length_error("Length for string can not be 'max_size'.")); }
+
+		grow(newsz);
+		memcpy(&ptr()[d_cplength], str, len * sizeof(value_type));
+		setlen(newsz);
 		return *this;
 	}
 protected:
 	virtual void	init(void)
 	{
-		d_reserve			= XSTRINGT_STRING_QUICKBUFF_SIZE;
+		d_reserve			= XSTRINGT_STRING_QUICKBUFFER_SIZE;
         d_buffer            = NULL;
 		setlen(0);
 	}
@@ -437,19 +475,17 @@ protected:
 protected:
 	size_type			d_cplength;			//!< holds length of string in code points (not including null termination)
 	size_type			d_reserve;			//!< code point reserve size (currently allocated buffer size in code points).
-	value_type			d_quickbuffer[XSTRINGT_STRING_QUICKBUFF_SIZE]; //!< This is a integrated 'quick' buffer to save allocations for smallish strings
+	value_type			d_quickbuffer[XSTRINGT_STRING_QUICKBUFFER_SIZE]; //!< This is a integrated 'quick' buffer to save allocations for smallish strings
 	value_type*			d_buffer;							//!< Pointer the the main buffer memory.  This is only valid when quick-buffer is not being used
 };
 
 //
-template <typename _TU>
-__inline bool StringBaseT<_TU>::grow(size_type new_size)
+template <class _TC, typename _TU>
+__inline bool StringBaseT<_TC,_TU>::grow(size_type new_size)
 {
     // check for too big
-    if (max_size() <= new_size)
-    {
-    	XSTRINGT_THROW(std::length_error("Resulting String::grow() would be too big"));
-    }
+    if (max_length() <= new_size)
+    { XSTRINGT_THROW(std::length_error("Resulting String::grow() would be too big")); }
 
     // increase, as we always null-terminate the buffer.
     ++new_size;
@@ -457,7 +493,7 @@ __inline bool StringBaseT<_TU>::grow(size_type new_size)
     if (new_size > d_reserve)
     {
     	value_type* temp = XSTRINGT_NEW_ARRAY_PT(value_type, new_size);
-        if (d_reserve > XSTRINGT_STRING_QUICKBUFF_SIZE)
+        if (d_reserve > XSTRINGT_STRING_QUICKBUFFER_SIZE)
         {
             memcpy(temp, d_buffer, (d_cplength + 1) * sizeof(value_type));
             XSTRINGT_DELETE_ARRAY_PT(d_buffer, value_type, d_reserve);
@@ -476,20 +512,20 @@ __inline bool StringBaseT<_TU>::grow(size_type new_size)
 }
 
 // perform re-allocation to remove wasted space.
-template <typename _TU>
-__inline void StringBaseT<_TU>::trim(void)
+template <class _TC, typename _TU>
+__inline void StringBaseT<_TC,_TU>::trim(void)
 {
     size_type min_size = d_cplength + 1;
 
     // only re-allocate when not using quick-buffer, and when size can be trimmed
-    if ((d_reserve > XSTRINGT_STRING_QUICKBUFF_SIZE) && (d_reserve > min_size))
+    if ((d_reserve > XSTRINGT_STRING_QUICKBUFFER_SIZE) && (d_reserve > min_size))
     {
             // see if we can trim to quick-buffer
-        if (min_size <= XSTRINGT_STRING_QUICKBUFF_SIZE)
+        if (min_size <= XSTRINGT_STRING_QUICKBUFFER_SIZE)
         {
             memcpy(d_quickbuffer, d_buffer, min_size * sizeof(value_type));
             XSTRINGT_DELETE_ARRAY_PT(d_buffer, value_type, d_reserve);
-            d_reserve = XSTRINGT_STRING_QUICKBUFF_SIZE;
+            d_reserve = XSTRINGT_STRING_QUICKBUFFER_SIZE;
         }
         // re-allocate buffer
         else
@@ -505,35 +541,7 @@ __inline void StringBaseT<_TU>::trim(void)
 }
 
 
-/*-----------------------------------------------------
-StringBaseU32 Class
--------------------------------------------------------*/
-class StringBaseU32 : public StringBaseT<utf32>
-{
-public:
-	StringBaseU32(){ }
-	virtual ~StringBaseU32(){ }
-};
 
-/*-----------------------------------------------------
-StringBaseU16 Class
--------------------------------------------------------*/
-class StringBaseU16 : public StringBaseT<utf16>
-{
-public:
-	StringBaseU16(){ }
-	virtual ~StringBaseU16(){ }
-};
-
-/*-----------------------------------------------------
-StringBaseU8 Class
--------------------------------------------------------*/
-class StringBaseU8 : public StringBaseT<utf8>
-{
-public:
-	StringBaseU8(){ }
-	virtual ~StringBaseU8(){ }
-};
 
 };//namespace XStringT
 
