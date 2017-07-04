@@ -47,9 +47,10 @@ int main()
 	XStringT::StringSwapperT<std::string> ss("123456 测试文本");
 	ss += "123456 測試文本";
 	ss += L"123456 테스트 텍스트";
-	ss = ss + "123456 ทดสอบข้อความ";
+	ss = ss + __XSTRINGT_STRING_UTF8A("123456 ทดสอบข้อความ");
 	ss = ss + L"123456 テストテキスト";
-	std::string rra = ss.c_str();
-	std::wstring rrw = ss.c_wstr();
+	std::string rra = ss.astr();
+	std::wstring rrw = ss.wstr();
+
 	return 0;
 }

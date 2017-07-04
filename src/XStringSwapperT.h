@@ -18,6 +18,11 @@
 namespace XStringT
 {
 
+//
+#define __XSTRINGT_STRING_UTFX(X)			(L##X)
+#define __XSTRINGT_STRING_UTF8A(X)			(XStringT::StringSwapperT<std::string>(__XSTRINGT_STRING_UTFX(X)))
+#define __XSTRINGT_STRING_UTF8W(X)			(XStringT::StringSwapperT<std::string>(__XSTRINGT_STRING_UTFX(X)))
+
 /*-----------------------------------------------------
 StringSwapper Class
 -------------------------------------------------------*/
@@ -38,6 +43,16 @@ class StringSwapperT : public StringSwapper
 public:
 	StringSwapperT(){ };
 	virtual ~StringSwapperT() { }; 
+
+	StringSwapperT(const StringSwapperT& sst) 
+	{ 
+		this->assign(sst);
+	};
+
+	StringSwapperT(const StringAU8& str) 
+	{ 
+		this->assign(str);
+	};
 
 	StringSwapperT(const char* str, StringBase::size_type len = StringBase::npos) 
 	{ 
@@ -71,7 +86,7 @@ public:
 
 	StringSwapperT&	operator+=(const StringSwapperT& sst)
 	{
-		return append(str);
+		return append(sst);
 	}
 	
 	StringSwapperT&	operator+=(const StringAU8& str)
@@ -90,8 +105,8 @@ public:
 	}
 
 public:
-	__inline std::string	c_str_U8()	const{ return _XTD(d_stringU8.c_str()); }
-	__inline std::string	c_str()		const
+	__inline std::string	str_U8()	const{ return _XTD(d_stringU8.c_str()); }
+	__inline std::string	astr()		const
 	{ 
 #if defined(_MSC_VER)
 		const char* v = d_transcoder.stringToANSI(d_stringU8);
@@ -101,7 +116,7 @@ public:
 #endif
 		return r;
 	}
-	__inline std::wstring	c_wstr()	const
+	__inline std::wstring	wstr()	const
 	{ 
 #if defined(_MSC_VER)
 		const utf16* v = d_transcoder.stringToUTF16(d_stringU8);
@@ -185,6 +200,13 @@ private:
 };
 
 //
+template<typename _XTD>
+__inline StringSwapperT<_XTD>	operator+(const StringSwapperT<_XTD>& sst1, const StringSwapperT<_XTD>& sst2)
+{
+	StringSwapperT<_XTD>	tmp(sst1); tmp += sst2;
+	return tmp;
+}
+
 template<typename _XTD>
 __inline StringSwapperT<_XTD>	operator+(const StringSwapperT<_XTD>& sst, const char* str)
 {
