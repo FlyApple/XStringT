@@ -21,7 +21,7 @@ namespace XStringT
 //
 #define __XSTRINGT_STRING_UTFX(X)			(L##X)
 #define __XSTRINGT_STRING_UTF8A(X)			(XStringT::StringSwapperT<std::string>(__XSTRINGT_STRING_UTFX(X)))
-#define __XSTRINGT_STRING_UTF8W(X)			(XStringT::StringSwapperT<std::string>(__XSTRINGT_STRING_UTFX(X)))
+#define __XSTRINGT_STRING_UTF8W(X)			(XStringT::StringSwapperT<std::wstring>(__XSTRINGT_STRING_UTFX(X)))
 
 /*-----------------------------------------------------
 StringSwapper Class
@@ -156,7 +156,7 @@ public:
 #if defined(_MSC_VER)
 		d_stringU8 = d_transcoder.stringFromUTF16((const utf16*)str, len);
 #else
-		d_stringU8 = d_transcoder.stringFromUTF32((const utf32)str, len);
+		d_stringU8 = d_transcoder.stringFromUTF32((const utf32*)str, len);
 #endif
 		return *this;
 	}
@@ -189,7 +189,7 @@ public:
 #if defined(_MSC_VER)
 		d_stringU8 += d_transcoder.stringFromUTF16((const utf16*)str, len);
 #else
-		d_stringU8 += d_transcoder.stringFromUTF32((const utf32)str, len);
+		d_stringU8 += d_transcoder.stringFromUTF32((const utf32*)str, len);
 #endif
 		return *this;
 	}

@@ -65,6 +65,7 @@ public:
 template <class _TC, typename _TU>
 class StringBaseT : public StringBase
 {
+public:
 	friend _TC;
 public:
 	//*************************

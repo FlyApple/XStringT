@@ -209,7 +209,7 @@ StringAU8		IconvStringTranscoder::stringFromANSI(const char* input, StringBase::
 	XSTRINGT_DELETE_ARRAY_PT(resultA, utf8, lengthA+1);
 
 #else
-	StringAU8 result(input);
+	StringAU8 result((const utf8*)data, length);
 #endif
 	return result;
 }
@@ -223,7 +223,7 @@ StringAU8 IconvStringTranscoder::stringFromUTF16(const utf16* input, StringBase:
 	return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf16));
 #else
     IconvHelper ich("WCHAR_T", UTF16PE());
-    return stringFromStringW(iconvTranscode<std::wstring, wchar_t>(ich, reinterpret_cast<const utf8*>(input), getStringLength(input)));
+    return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf16));
 #endif
 }
 
@@ -237,7 +237,7 @@ StringAU8 IconvStringTranscoder::stringFromUTF32(const utf32* input, StringBase:
 	return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf32));
 #else
     IconvHelper ich("WCHAR_T", UTF32PE());
-    return stringFromStringW(iconvTranscode<std::wstring, wchar_t>(ich, reinterpret_cast<const utf8*>(input), getStringLength(input)));
+    return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf32));
 #endif
 }
 

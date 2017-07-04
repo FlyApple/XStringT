@@ -27,13 +27,13 @@ public:
 	typedef	StringBase::size_type									size_type;					//!< Unsigned type used for size values and indices
 	typedef	StringBaseT<StringAU8, utf8>::value_type				value_type;					//!< Basic 'code point' type used for String (utf32)
 	typedef	StringBaseT<StringAU8, utf8>::reference&				reference;					//!< Type used for utf32 code point references
-	typedef	const StringBaseT<StringAU8, utf8>::const_reference&	const_reference;			//!< Type used for constant utf32 code point references
+	typedef	StringBaseT<StringAU8, utf8>::const_reference&			const_reference;			//!< Type used for constant utf32 code point references
 	typedef	StringBaseT<StringAU8, utf8>::pointer*					pointer;					//!< Type used for utf32 code point pointers
-	typedef	const StringBaseT<StringAU8, utf8>::const_pointer*		const_pointer;				//!< Type used for constant utf32 code point pointers
+	typedef	StringBaseT<StringAU8, utf8>::const_pointer*			const_pointer;				//!< Type used for constant utf32 code point pointers
 
 public:
-	StringAU8();
-	virtual ~StringAU8();
+	StringAU8(void);
+	virtual ~StringAU8(void);
 
 	//////////////////////////////////////////////////////////////////////////
 	// Construction via XStringT::StringU8
@@ -262,6 +262,17 @@ public:
 		return StringAU8(*this, idx, len);
 	}
 
+	size_type	copy(utf8* buf, size_type len = StringBase::npos, size_type idx = 0) const
+	{
+		if (d_stringU8.length() < idx)
+		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringAU8::copy().")); }
+
+		if (len == StringBase::npos)
+		{ len = d_stringU32.length(); }
+
+		return encode(&data()[idx], buf, StringBase::npos, len);
+	}
+
 protected:
 	virtual void	init(void)
 	{
@@ -270,12 +281,14 @@ protected:
 	}
 
 	// return number of utf32 code units required to re-encode given utf8 data as utf32.  len is number of code units in 'buf'.
+	size_type encoded_size(utf32 code_point) const;
 	size_type encoded_size(const utf8* buf, size_type len) const;
 	// encoding functions
 	// for all:
 	//	src_len is in code units, or 0 for null terminated string.
 	//	dest_len is in code units.
 	//	returns number of code units put into dest buffer.
+	size_type encode(const utf32* src, utf8* dest, size_type dest_len, size_type src_len = 0) const;
 	size_type encode(const utf8* src, utf32* dest, size_type dest_len, size_type src_len = 0) const;
 
 	// return number of code units in a null terminated string
