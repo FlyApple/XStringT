@@ -15,6 +15,7 @@
 
 #include "XStringT.h"
 #include "XStringTranscoderT.h"
+#include "XStringSwapperT.h"
 
 //
 int main()
@@ -31,17 +32,24 @@ int main()
 	str2 = tran.stringFromANSI("123456 测试文本");
 
 	XStringT::StringAU8 str3;
-	str3 = tran.stringFromStringW(std::wstring(L"123456 测试文本"));
+	//str3 = tran.stringFromStringW(std::wstring(L"123456 测试文本"));
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 測試文本"));
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 테스트 텍스트"));
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 テストテキスト"));
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 ทดสอบข้อความ"));
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 Kiểm tra văn bản"));
 
-	A = tran.stringToANSI(str3);
-	B = (const wchar_t*)tran.stringToUTF16(str3);
-	tran.deleteANSIBuffer(A);
-	tran.deleteUTF16Buffer((const XStringT::utf16*)B);
+//	A = tran.stringToANSI(str3);
+//	B = (const wchar_t*)tran.stringToUTF16(str3);
+//	tran.deleteANSIBuffer(A);
+//	tran.deleteUTF16Buffer((const XStringT::utf16*)B);
 
+	XStringT::StringSwapperT<std::string> ss("123456 测试文本");
+	ss += "123456 測試文本";
+	ss += L"123456 테스트 텍스트";
+	ss = ss + "123456 ทดสอบข้อความ";
+	ss = ss + L"123456 テストテキスト";
+	std::string rra = ss.c_str();
+	std::wstring rrw = ss.c_wstr();
 	return 0;
 }

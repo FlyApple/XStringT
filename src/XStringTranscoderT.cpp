@@ -146,8 +146,6 @@ static String_T iconvTranscode(IconvHelper& ich, const utf8* in_buf, size_t in_l
     return result;
 }
 
-
-//----------------------------------------------------------------------------//
 IconvStringTranscoder::IconvStringTranscoder()
 {
 #if defined(_MSC_VER)
@@ -185,22 +183,17 @@ utf16* IconvStringTranscoder::stringToUTF16(const StringAU8& input) const
 	return iconvTranscode<utf16>(ich, (const utf8*)input.c_str(), getStringLength(input.c_str()));
 }
 
-//----------------------------------------------------------------------------//
-std::wstring IconvStringTranscoder::stringToStringW(const StringAU8& input) const
+utf32* IconvStringTranscoder::stringToUTF32(const StringAU8& input) const
 {
-#if defined(_MSC_VER)
-	IconvHelper ich(UTF16PE(), "UTF-8");
-#else
-    IconvHelper ich("WCHAR_T", "UTF-8");
-#endif
-	return iconvTranscode<std::wstring, wchar_t>(ich, (const utf8*)input.c_str(), getStringLength(input.c_str()));
+    IconvHelper ich(UTF32PE(), "UTF-8");
+	return iconvTranscode<utf32>(ich, (const utf8*)input.c_str(), getStringLength(input.c_str()));
 }
 
 //----------------------------------------------------------------------------//
-StringAU8		IconvStringTranscoder::stringFromANSI(const char* input) const
+StringAU8		IconvStringTranscoder::stringFromANSI(const char* input, StringBase::size_type len) const
 {
 	const char* data = input;
-	int length = strlen((const char*)data);
+	int length = len != StringBase::npos ? len : getStringLength(data);
 
 #if defined(_MSC_VER)
 
@@ -221,29 +214,33 @@ StringAU8		IconvStringTranscoder::stringFromANSI(const char* input) const
 	return result;
 }
 
-//----------------------------------------------------------------------------//
-StringAU8 IconvStringTranscoder::stringFromUTF16(const utf16* input) const
+StringAU8 IconvStringTranscoder::stringFromUTF16(const utf16* input, StringBase::size_type len) const
 {
+	int length = len != StringBase::npos ? len : getStringLength(input);
+
 #if defined(_MSC_VER)
     IconvHelper ich("UTF-8", UTF16PE());
-    return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), getStringLength(input)*sizeof(utf16));
+	return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf16));
 #else
     IconvHelper ich("WCHAR_T", UTF16PE());
     return stringFromStringW(iconvTranscode<std::wstring, wchar_t>(ich, reinterpret_cast<const utf8*>(input), getStringLength(input)));
 #endif
 }
 
-//----------------------------------------------------------------------------//
-StringAU8 IconvStringTranscoder::stringFromStringW(const std::wstring& input) const
+
+StringAU8 IconvStringTranscoder::stringFromUTF32(const utf32* input, StringBase::size_type len) const
 {
+	int length = len != StringBase::npos ? len : getStringLength(input);
+
 #if defined(_MSC_VER)
-    IconvHelper ich("UTF-8", UTF16PE());
-    return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input.c_str()), input.length() * sizeof(wchar_t));
+    IconvHelper ich("UTF-8", UTF32PE());
+	return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf32));
 #else
-    IconvHelper ich("WCHAR_T", UTF16PE());
-    return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input.c_str()), input.length() * sizeof(wchar_t));
+    IconvHelper ich("WCHAR_T", UTF32PE());
+    return stringFromStringW(iconvTranscode<std::wstring, wchar_t>(ich, reinterpret_cast<const utf8*>(input), getStringLength(input)));
 #endif
 }
+
 
 //----------------------------------------------------------------------------//
 void IconvStringTranscoder::deleteANSIBuffer(const char* input) const
@@ -256,5 +253,9 @@ void IconvStringTranscoder::deleteUTF16Buffer(const utf16* input) const
     deleteTranscodeBuffer(input);
 }
 
+void IconvStringTranscoder::deleteUTF32Buffer(const utf32* input) const
+{
+    deleteTranscodeBuffer(input);
+}
 
 }

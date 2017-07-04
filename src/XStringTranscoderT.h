@@ -23,14 +23,10 @@ public:
 	StringTranscoder(){}
 	virtual ~StringTranscoder() {}
 
-	//
-    virtual utf16*			stringToUTF16(const StringAU8& input) const = 0;
-    virtual std::wstring	stringToStringW(const StringAU8& input) const = 0;
-    virtual StringAU8		stringFromUTF16(const utf16* input) const = 0;
-    virtual StringAU8		stringFromStringW(const std::wstring& input) const = 0;
-
-    //! deletes a buffer returned from the stringToUTF16 function.
-    virtual void deleteUTF16Buffer(const utf16* input) const = 0;    
+    //! deletes a buffer returned from the stringToXXX function.
+    virtual void		deleteANSIBuffer(const char* input) const		= 0;
+    virtual void		deleteUTF16Buffer(const utf16* input) const		= 0;
+    virtual void		deleteUTF32Buffer(const utf32* input) const		= 0; 
 };
 
 /*-----------------------------------------------------
@@ -45,12 +41,15 @@ public:
     // implement abstract interface
 	char*			stringToANSI(const StringAU8& input) const;
     utf16*			stringToUTF16(const StringAU8& input) const;
-    std::wstring	stringToStringW(const StringAU8& input) const;
-	StringAU8		stringFromANSI(const char* input) const;
-    StringAU8		stringFromUTF16(const utf16* input) const;
-    StringAU8		stringFromStringW(const std::wstring& input) const;
+    utf32*			stringToUTF32(const StringAU8& input) const;
+
+	StringAU8		stringFromANSI(const char* input, StringBase::size_type len = StringBase::npos) const;
+    StringAU8		stringFromUTF16(const utf16* input, StringBase::size_type len = StringBase::npos) const;
+    StringAU8		stringFromUTF32(const utf32* input, StringBase::size_type len = StringBase::npos) const;
+
     void			deleteANSIBuffer(const char* input) const;
     void			deleteUTF16Buffer(const utf16* input) const;
+    void			deleteUTF32Buffer(const utf32* input) const;
 
 private:
 	

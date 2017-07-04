@@ -27,6 +27,9 @@
     <ClCompile Include="XStringBaseT.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="XStringSwapperT.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="XStringT.h">
@@ -36,6 +39,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="XStringBaseT.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="XStringSwapperT.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

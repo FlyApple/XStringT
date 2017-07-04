@@ -84,11 +84,13 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="XStringBaseT.cpp" />
+    <ClCompile Include="XStringSwapperT.cpp" />
     <ClCompile Include="XStringT.cpp" />
     <ClCompile Include="XStringTranscoderT.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="XStringBaseT.h" />
+    <ClInclude Include="XStringSwapperT.h" />
     <ClInclude Include="XStringT.h" />
     <ClInclude Include="XStringTranscoderT.h" />
   </ItemGroup>
