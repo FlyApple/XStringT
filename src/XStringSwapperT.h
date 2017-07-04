@@ -105,7 +105,7 @@ public:
 	}
 
 public:
-	__inline std::string	str_U8()	const{ return _XTD(d_stringU8.c_str()); }
+	__inline const char*	c_str()		const{ return d_stringU8.c_str(); }
 	__inline std::string	astr()		const
 	{ 
 #if defined(_MSC_VER)
@@ -116,7 +116,7 @@ public:
 #endif
 		return r;
 	}
-	__inline std::wstring	wstr()	const
+	__inline std::wstring	wstr()		const
 	{ 
 #if defined(_MSC_VER)
 		const utf16* v = d_transcoder.stringToUTF16(d_stringU8);
