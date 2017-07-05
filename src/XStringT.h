@@ -117,8 +117,9 @@ public:
 		return (const char*)d_stringU8.ptr();
 	}
 
-	const utf32* data(void) const
+	const utf32* data(void)
 	{
+		build_utf32_buffer();
 		return d_stringU32.ptr();
 	}
 
@@ -132,7 +133,7 @@ public:
 
 	size_type	length(void) const
 	{
-		return d_stringU8.size();
+		return d_stringU8.length();
 	}
 
 	size_type	max_size(void) const
@@ -178,10 +179,6 @@ public:
 		{ return *this; }
 
 		d_stringU8.erase(idx, len);
-
-		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
-
-		build_utf32_buffer();
 		return	*this;
 	}
 		
@@ -191,10 +188,6 @@ public:
 	StringAU8&	assign(const StringAU8& str, size_type str_idx = 0, size_type str_num = StringBase::npos)
 	{
 		d_stringU8.assign(str.d_stringU8, str_idx, str_num);
-
-		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
-
-		build_utf32_buffer();
 		return *this;
 	}
 
@@ -206,10 +199,6 @@ public:
 	StringAU8&	assign(const utf8* utf8_str, size_type str_num)
 	{
 		d_stringU8.assign(utf8_str, str_num);
-
-		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
-
-		build_utf32_buffer();
 		return *this;
 	}
 
@@ -219,10 +208,6 @@ public:
 	StringAU8& append(const StringAU8& str, size_type str_idx = 0, size_type str_num = StringBase::npos)
 	{
 		d_stringU8.append(str.d_stringU8, str_idx, str_num);
-
-		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
-
-		build_utf32_buffer();
 		return *this;
 	}
 
@@ -234,10 +219,6 @@ public:
 	StringAU8& append(const utf8* utf8_str, size_type len)
 	{
 		d_stringU8.append(utf8_str, len);
-
-		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
-
-		build_utf32_buffer();
 		return *this;
 	}
 
@@ -268,8 +249,6 @@ public:
 
 		memcpy(&d_stringU8.ptr()[idx], &str.d_stringU8.ptr()[str_idx], str_num * sizeof(StringBaseT<StringAU8, utf8>::value_type));
 		d_stringU8.setlen(newsz);
-
-		build_utf32_buffer();
 		return *this;
 	}
 
@@ -297,8 +276,6 @@ public:
 
 		memcpy(&d_stringU8.ptr()[idx], utf8_str, str_len * sizeof(StringBaseT<StringAU8, utf8>::value_type));
 		d_stringU8.setlen(newsz);
-
-		build_utf32_buffer();
 		return *this;
 	}
 
@@ -313,7 +290,7 @@ public:
 		return StringAU8(*this, idx, len);
 	}
 
-	size_type	copy(utf8* buf, size_type len = StringBase::npos, size_type idx = 0) const
+	size_type	copy(utf8* buf, size_type len = StringBase::npos, size_type idx = 0)
 	{
 		if (d_stringU8.length() < idx)
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringAU8::copy().")); }
@@ -321,37 +298,33 @@ public:
 		if (len == StringBase::npos)
 		{ len = d_stringU8.length(); }
 
-		memcpy(buf, d_stringU8.ptr(), len * sizeof(StringBaseT<StringAU8, utf8>::value_type));
+		memcpy(buf, &d_stringU8.ptr()[idx], len * sizeof(StringBaseT<StringAU8, utf8>::value_type));
 		return len;
 	}
 
-	size_type	copy(utf32* buf, size_type len = StringBase::npos, size_type idx = 0) const
+	size_type	copy(utf32* buf, size_type len = StringBase::npos, size_type idx = 0)
 	{
+		build_utf32_buffer();
+
 		if (d_stringU32.length() < idx)
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringAU8::copy().")); }
 
 		if (len == StringBase::npos)
 		{ len = d_stringU32.length(); }
 
-		memcpy(buf, d_stringU32.ptr(), len * sizeof(StringBaseT<StringAU8, utf32>::value_type));
+		memcpy(buf, &d_stringU32.ptr()[idx], len * sizeof(StringBaseT<StringAU8, utf32>::value_type));
 		return len;
 	}
 
 	StringAU8&	lower()
 	{
 		std::transform(d_stringU8.begin(), d_stringU8.end(), d_stringU8.begin(), tolower);
-
-		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
-
-		build_utf32_buffer();
 		return *this;
 	}
 
 	StringAU8&	upper()
 	{
 		std::transform(d_stringU8.begin(), d_stringU8.end(), d_stringU8.begin(), toupper);
-
-		build_utf32_buffer();
 		return *this;
 	}
 
