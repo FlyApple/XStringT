@@ -94,7 +94,7 @@ StringAU8::size_type StringAU8::encode(const utf32* src, utf8* dest, size_type d
 	size_type destCapacity = dest_len;
 
 	// while there is data in the source buffer,
-	for (uint idx = 0; idx < src_len; ++idx)
+	for (size_type idx = 0; idx < src_len; ++idx)
 	{
 		utf32	cp = src[idx];
 

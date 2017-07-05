@@ -8,7 +8,7 @@
 #ifndef __XSTRINGBASET_H__
 #define __XSTRINGBASET_H__
 
-#include <cstddef>
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 

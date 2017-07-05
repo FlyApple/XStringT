@@ -29,9 +29,14 @@ int main()
 	XStringT::IconvStringTranscoder tran;
 	
 	XStringT::StringAU8 str2;
-	str2 = tran.stringFromANSI("123456 测试文本");
+	str2 = tran.stringFromANSI("123456 Hello World 测试文本");
 
 	XStringT::StringAU8 str3;
+	str3 = tran.stringFromANSI("ABCDEF");
+
+//	str2.replace(5, 1, str3, 0);
+//	str2.replace(5, 2, (XStringT::utf8*)"abcdef");
+
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 测试文本"));
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 測試文本"));
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 테스트 텍스트"));

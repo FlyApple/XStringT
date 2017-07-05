@@ -181,9 +181,7 @@ public:
 
 		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
 
-		d_stringU32.reserve(enc_sze);
-		encode(d_stringU8.ptr(), d_stringU32.ptr(), enc_sze, d_stringU8.size());
-		d_stringU32.setlen(enc_sze);
+		build_utf32_buffer();
 		return	*this;
 	}
 		
@@ -196,9 +194,7 @@ public:
 
 		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
 
-		d_stringU32.reserve(enc_sze);
-		encode(d_stringU8.ptr(), d_stringU32.ptr(), enc_sze, d_stringU8.size());
-		d_stringU32.setlen(enc_sze);
+		build_utf32_buffer();
 		return *this;
 	}
 
@@ -213,9 +209,7 @@ public:
 
 		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
 
-		d_stringU32.reserve(enc_sze);
-		encode(d_stringU8.ptr(), d_stringU32.ptr(), enc_sze, d_stringU8.size());
-		d_stringU32.setlen(enc_sze);
+		build_utf32_buffer();
 		return *this;
 	}
 
@@ -228,9 +222,7 @@ public:
 
 		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
 
-		d_stringU32.reserve(enc_sze);
-		encode(d_stringU8.ptr(), d_stringU32.ptr(), enc_sze, d_stringU8.size());
-		d_stringU32.setlen(enc_sze);
+		build_utf32_buffer();
 		return *this;
 	}
 
@@ -245,16 +237,75 @@ public:
 
 		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
 
-		d_stringU32.reserve(enc_sze);
-		encode(d_stringU8.ptr(), d_stringU32.ptr(), enc_sze, d_stringU8.size());
-		d_stringU32.setlen(enc_sze);
+		build_utf32_buffer();
+		return *this;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// Replacing Characters
+	//////////////////////////////////////////////////////////////////////////
+	StringAU8& replace(size_type idx, size_type len, const StringAU8& str)
+	{
+		return replace(idx, len, str, 0, StringBase::npos);
+	}
+
+	StringAU8& replace(size_type idx, size_type len, const StringAU8& str, size_type str_idx, size_type str_num = StringBase::npos)
+	{
+		if ((d_stringU8.length() < idx) || (str.d_stringU8.length() < str_idx))
+		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringX::StringAU8::replace().")); }
+
+		if (((str_idx + str_num) > str.d_stringU8.length()) || (str_num == StringBase::npos))
+		{ str_num = str.d_stringU8.length() - str_idx; }
+
+		if (((len + idx) > d_stringU8.length()) || (len == StringBase::npos))
+		{ len = d_stringU8.length() - idx; }
+
+		size_type newsz = d_stringU8.length() + str_num - len;
+		d_stringU8.reserve(newsz);
+
+		if ((idx + len) < d_stringU8.length())
+		{ memmove(&d_stringU8.ptr()[idx + str_num], &d_stringU8.ptr()[len + idx], (d_stringU8.length() - idx - len) * sizeof(StringBaseT<StringAU8, utf8>::value_type)); }
+
+		memcpy(&d_stringU8.ptr()[idx], &str.d_stringU8.ptr()[str_idx], str_num * sizeof(StringBaseT<StringAU8, utf8>::value_type));
+		d_stringU8.setlen(newsz);
+
+		build_utf32_buffer();
+		return *this;
+	}
+
+	StringAU8& replace(size_type idx, size_type len, const utf8* utf8_str)
+	{
+		return replace(idx, len, utf8_str, total_length(utf8_str));
+	}
+
+	StringAU8& replace(size_type idx, size_type len, const utf8* utf8_str, size_type str_len)
+	{
+		if (d_stringU8.length() < idx)
+		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringX::StringAU8::replace().")); }
+
+		if (str_len == StringBase::npos)
+		{ XSTRINGT_THROW(std::length_error("Length for utf8 encoded string can not be 'npos'.")); }
+
+		if (((len + idx) > d_stringU8.length()) || (len == StringBase::npos))
+		{ len = d_stringU8.length() - idx; }
+
+		size_type newsz = d_stringU8.length() + str_len - len;
+		d_stringU8.reserve(newsz);
+
+		if ((idx + len) < d_stringU8.length())
+		{ memmove(&d_stringU8.ptr()[idx + str_len], &d_stringU8.ptr()[len + idx], (d_stringU8.length() - idx - len) * sizeof(StringBaseT<StringAU8, utf8>::value_type)); }
+
+		memcpy(&d_stringU8.ptr()[idx], utf8_str, str_len * sizeof(StringBaseT<StringAU8, utf8>::value_type));
+		d_stringU8.setlen(newsz);
+
+		build_utf32_buffer();
 		return *this;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	// Substring
 	//////////////////////////////////////////////////////////////////////////
-	StringAU8 substr(size_type idx = 0, size_type len = StringBase::npos) const
+	StringAU8	substr(size_type idx = 0, size_type len = StringBase::npos) const
 	{
 		if (d_stringU8.length() < idx)
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for this XStringT::StringAU8::substr().")); }
@@ -268,9 +319,40 @@ public:
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringAU8::copy().")); }
 
 		if (len == StringBase::npos)
+		{ len = d_stringU8.length(); }
+
+		memcpy(buf, d_stringU8.ptr(), len * sizeof(StringBaseT<StringAU8, utf8>::value_type));
+		return len;
+	}
+
+	size_type	copy(utf32* buf, size_type len = StringBase::npos, size_type idx = 0) const
+	{
+		if (d_stringU32.length() < idx)
+		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringAU8::copy().")); }
+
+		if (len == StringBase::npos)
 		{ len = d_stringU32.length(); }
 
-		return encode(&data()[idx], buf, StringBase::npos, len);
+		memcpy(buf, d_stringU32.ptr(), len * sizeof(StringBaseT<StringAU8, utf32>::value_type));
+		return len;
+	}
+
+	StringAU8&	lower()
+	{
+		std::transform(d_stringU8.begin(), d_stringU8.end(), d_stringU8.begin(), tolower);
+
+		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
+
+		build_utf32_buffer();
+		return *this;
+	}
+
+	StringAU8&	upper()
+	{
+		std::transform(d_stringU8.begin(), d_stringU8.end(), d_stringU8.begin(), toupper);
+
+		build_utf32_buffer();
+		return *this;
 	}
 
 protected:
@@ -301,6 +383,16 @@ protected:
 	{
 		size_type cnt = 0; while (*utf32_str++){ cnt++; }
 		return cnt;
+	}
+
+	//
+	__inline void		build_utf32_buffer()
+	{
+		size_type enc_sze = encoded_size(d_stringU8.ptr(), d_stringU8.length());
+
+		d_stringU32.reserve(enc_sze);
+		encode(d_stringU8.ptr(), d_stringU32.ptr(), enc_sze, d_stringU8.size());
+		d_stringU32.setlen(enc_sze);
 	}
 
 protected:
