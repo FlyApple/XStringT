@@ -194,6 +194,19 @@ public:
 		return *this;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	// Comparisons
+	//////////////////////////////////////////////////////////////////////////
+	int		compare(const StringSwapperT& sst) const
+	{
+		return compare(sst.d_stringU8);
+	}
+	
+	int		compare(const StringAU8& str) const
+	{
+		return compare(str);
+	}
+
 private:
 	IconvStringTranscoder		d_transcoder;
 	StringAU8					d_stringU8;

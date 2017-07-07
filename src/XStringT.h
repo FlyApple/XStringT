@@ -280,6 +280,52 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////////////
+	// Comparisons
+	//////////////////////////////////////////////////////////////////////////
+	int		compare(const StringAU8& str) const
+	{
+		return compare(0, d_stringU8.length(), str);
+	}
+
+	int		compare(size_type idx, size_type len, const StringAU8& str, size_type str_idx = 0, size_type str_len = StringBase::npos) const
+	{
+		if ((d_stringU8.length() < idx) || (str.d_stringU8.length() < str_idx))
+		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringAU8::compare().")); }
+
+		if ((len == StringBase::npos) || (idx + len > d_stringU8.length()))
+		{ len = d_stringU8.length() - idx; }
+
+		if ((str_len == StringBase::npos) || (str_idx + str_len > str.d_stringU8.length()))
+		{ str_len = str.d_stringU8.length() - str_idx; }
+
+		return strncmp((const char*)&d_stringU8.ptr()[idx], (const char*)&str.d_stringU8.ptr()[str_idx], (len < str_len) ? len : str_len);
+	}
+
+	int		compare(const utf8* utf8_str) const
+	{
+		return compare(0, d_stringU8.length(), utf8_str, total_length(utf8_str));
+	}
+
+	int		compare(size_type idx, size_type len, const utf8* utf8_str) const
+	{
+		return compare(idx, len, utf8_str, total_length(utf8_str));
+	}
+
+	int		compare(size_type idx, size_type len, const utf8* utf8_str, size_type str_cplen) const
+	{
+		if (d_stringU8.length() < idx)
+		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringAU8::compare().")); }
+
+		if (str_cplen == StringBase::npos)
+		{ XSTRINGT_THROW(std::length_error("Length for utf8 encoded string can not be 'npos'.")); }
+
+		if ((len == StringBase::npos) || (idx + len > d_stringU8.length()))
+		{ len = d_stringU8.length() - idx; }
+
+		return strncmp((const char*)&d_stringU8.ptr()[idx], (const char*)utf8_str, (len < str_cplen) ? len : str_cplen);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
 	// Substring
 	//////////////////////////////////////////////////////////////////////////
 	StringAU8	substr(size_type idx = 0, size_type len = StringBase::npos) const
