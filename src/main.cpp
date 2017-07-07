@@ -56,6 +56,5 @@ int main()
 	ss = ss + L"123456 テストテキスト";
 	std::string rra = ss.astr();
 	std::wstring rrw = ss.wstr();
-
 	return 0;
 }

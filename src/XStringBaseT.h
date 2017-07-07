@@ -23,6 +23,15 @@ typedef		unsigned short	utf16;
 typedef		unsigned int	utf32;
 
 //
+#ifndef XSTRINGT_MAX
+#define XSTRINGT_MAX(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef XSTRINGT_MIN
+#define XSTRINGT_MIN(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
+//
 #ifndef XSTRINGT_NEW_PT
 #   define XSTRINGT_NEW_PT(T) 						new T
 #endif
@@ -401,6 +410,8 @@ public:
 
 		if (str_num >= max_length())
 		{ XSTRINGT_THROW(std::length_error("Length for string can not be 'max_size'.")); }
+
+		str_num = XSTRINGT_MIN(str_num, total_length(str));
 
 		grow(str_num);
 		setlen(str_num);

@@ -20,6 +20,8 @@ namespace XStringT
 
 //
 #define __XSTRINGT_STRING_UTFX(X)			(L##X)
+#define __XSTRINGT_STRING_UTF8_AS(X)		(XStringT::StringAU8((const XStringT::utf8*)X))
+#define __XSTRINGT_STRING_UTF8_ASL(X,V)		(XStringT::StringAU8((const XStringT::utf8*)X, V))
 #define __XSTRINGT_STRING_UTF8A(X)			(XStringT::StringSwapperT<std::string>(__XSTRINGT_STRING_UTFX(X)))
 #define __XSTRINGT_STRING_UTF8W(X)			(XStringT::StringSwapperT<std::wstring>(__XSTRINGT_STRING_UTFX(X)))
 
