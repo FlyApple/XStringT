@@ -199,12 +199,12 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	int		compare(const StringSwapperT& sst) const
 	{
-		return compare(sst.d_stringU8);
+		return d_stringU8.compare(sst.d_stringU8);
 	}
 	
 	int		compare(const StringAU8& str) const
 	{
-		return compare(str);
+		return d_stringU8.compare(str);
 	}
 
 private:
