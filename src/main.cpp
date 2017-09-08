@@ -31,6 +31,7 @@ int main()
 	XStringT::StringAU8 str2;
 	str2 = tran.stringFromANSI("123456 Hello World 测试文本");
 
+//
 	XStringT::StringAU8 str3;
 	str3 = tran.stringFromANSI("ABCDEF");
 
@@ -44,10 +45,11 @@ int main()
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 ทดสอบข้อความ"));
 	//str3 = tran.stringFromStringW(std::wstring(L"123456 Kiểm tra văn bản"));
 
-//	A = tran.stringToANSI(str3);
+	A = tran.stringToANSI(str2);
 //	B = (const wchar_t*)tran.stringToUTF16(str3);
-//	tran.deleteANSIBuffer(A);
+	tran.deleteANSIBuffer(A);
 //	tran.deleteUTF16Buffer((const XStringT::utf16*)B);
+
 
 	XStringT::StringSwapperT<std::string> ss("123456 测试文本");
 	ss += "123456 測試文本";
@@ -56,5 +58,10 @@ int main()
 	ss = ss + L"123456 テストテキスト";
 	std::string rra = ss.astr();
 	std::wstring rrw = ss.wstr();
+
+	printf(ss.astr().c_str());
+	wprintf(L"\r%S",ss.wstr().c_str());
+	printf("\r%s",rra.c_str());
+//	printf("\r%s", tran.stringFromUTF16((tran.stringToUTF16(str2))).c_str());
 	return 0;
 }

@@ -39,9 +39,9 @@ public:
     IconvStringTranscoder();
 
     // implement abstract interface
-	char*			stringToANSI(const StringAU8& input) const;
-    utf16*			stringToUTF16(const StringAU8& input) const;
-    utf32*			stringToUTF32(const StringAU8& input) const;
+	char*			stringToANSI(StringAU8& input) const;
+    utf16*			stringToUTF16(StringAU8& input) const;
+    utf32*			stringToUTF32(StringAU8& input) const;
 
 	StringAU8		stringFromANSI(const char* input, StringBase::size_type len = StringBase::npos) const;
     StringAU8		stringFromUTF16(const utf16* input, StringBase::size_type len = StringBase::npos) const;

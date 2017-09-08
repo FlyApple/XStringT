@@ -27,9 +27,9 @@ public:
     //------------------------------------------------------------------------//
     IconvHelper(const std::string& tocode, const std::string& fromcode) :
         d_fromCode(fromcode),
-        d_toCode(tocode),
-        d_cd(iconv_open(d_toCode.c_str(), d_fromCode.c_str()))
+        d_toCode(tocode)
     {
+    	d_cd = iconv_open(d_toCode.c_str(), d_fromCode.c_str());
         if (d_cd == reinterpret_cast<iconv_t>(-1))
 		{
             XSTRINGT_THROW("Failed to create conversion descriptor from \"" + d_fromCode + "\" to \"" + d_toCode + "\".");
@@ -155,7 +155,7 @@ IconvStringTranscoder::IconvStringTranscoder()
 }
 
 //----------------------------------------------------------------------------//
-char* IconvStringTranscoder::stringToANSI(const StringAU8& input) const
+char* IconvStringTranscoder::stringToANSI(StringAU8& input) const
 {
 	const char* data = input.c_str();
 	int length = strlen((const char*)data);
@@ -177,13 +177,13 @@ char* IconvStringTranscoder::stringToANSI(const StringAU8& input) const
 	return (char*)result;
 }
 
-utf16* IconvStringTranscoder::stringToUTF16(const StringAU8& input) const
+utf16* IconvStringTranscoder::stringToUTF16(StringAU8& input) const
 {
     IconvHelper ich(UTF16PE(), "UTF-8");
 	return iconvTranscode<utf16>(ich, (const utf8*)input.c_str(), getStringLength(input.c_str()));
 }
 
-utf32* IconvStringTranscoder::stringToUTF32(const StringAU8& input) const
+utf32* IconvStringTranscoder::stringToUTF32(StringAU8& input) const
 {
     IconvHelper ich(UTF32PE(), "UTF-8");
 	return iconvTranscode<utf32>(ich, (const utf8*)input.c_str(), getStringLength(input.c_str()));
@@ -222,7 +222,7 @@ StringAU8 IconvStringTranscoder::stringFromUTF16(const utf16* input, StringBase:
     IconvHelper ich("UTF-8", UTF16PE());
 	return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf16));
 #else
-    IconvHelper ich("WCHAR_T", UTF16PE());
+    IconvHelper ich("UTF-8", UTF16PE());
     return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf16));
 #endif
 }
@@ -236,7 +236,7 @@ StringAU8 IconvStringTranscoder::stringFromUTF32(const utf32* input, StringBase:
     IconvHelper ich("UTF-8", UTF32PE());
 	return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf32));
 #else
-    IconvHelper ich("WCHAR_T", UTF32PE());
+    IconvHelper ich("UTF-8", UTF32PE());
     return iconvTranscode<StringAU8, utf8>(ich, reinterpret_cast<const utf8*>(input), length*sizeof(utf32));
 #endif
 }

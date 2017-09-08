@@ -108,7 +108,7 @@ public:
 
 public:
 	__inline const char*	c_str()		const{ return d_stringU8.c_str(); }
-	__inline std::string	astr()		const
+	__inline std::string	astr()
 	{ 
 #if defined(_MSC_VER)
 		const char* v = d_transcoder.stringToANSI(d_stringU8);
@@ -118,7 +118,7 @@ public:
 #endif
 		return r;
 	}
-	__inline std::wstring	wstr()		const
+	__inline std::wstring	wstr()
 	{ 
 #if defined(_MSC_VER)
 		const utf16* v = d_transcoder.stringToUTF16(d_stringU8);
