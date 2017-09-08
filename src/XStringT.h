@@ -24,7 +24,7 @@ StringAU8 Class
 class StringAU8
 {
 public:
-	typedef	StringBase::size_type									size_type;					//!< Unsigned type used for size values and indices
+	typedef	StringBase<utf8>::size_type								size_type;					//!< Unsigned type used for size values and indices
 	typedef	StringBaseT<StringAU8, utf8>::value_type				value_type;					//!< Basic 'code point' type used for String (utf32)
 	typedef	StringBaseT<StringAU8, utf8>::reference&				reference;					//!< Type used for utf32 code point references
 	typedef	StringBaseT<StringAU8, utf8>::const_reference&			const_reference;			//!< Type used for constant utf32 code point references
@@ -44,7 +44,7 @@ public:
 		assign(str);
 	}
 
-	StringAU8(const StringAU8& str, size_type str_idx, size_type str_num = StringBase::npos)
+	StringAU8(const StringAU8& str, size_type str_idx, size_type str_num = StringBase<utf8>::npos)
 	{
 		init();
 		assign(str, str_idx, str_num);
@@ -85,12 +85,12 @@ public:
 
 	reference	operator[](size_type idx)
 	{
-		return (d_stringU8.ptr()[idx]);
+		return (d_stringU8._Myptr()[idx]);
 	}
 
 	value_type	operator[](size_type idx) const
 	{
-		return d_stringU8.ptr()[idx];
+		return d_stringU8.data()[idx];
 	}
 
 	reference	at(size_type idx)
@@ -98,7 +98,7 @@ public:
 		if (d_stringU8.length() <= idx)
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::String::at().")); }
 
-		return d_stringU8.ptr()[idx];
+		return d_stringU8.at(idx);
 	}
 
 	const_reference	at(size_type idx) const
@@ -106,7 +106,7 @@ public:
 		if (d_stringU8.length() <= idx)
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::String::at().")); }
 
-		return d_stringU8.ptr()[idx];
+		return d_stringU8.at(idx);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -114,13 +114,13 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	virtual const char* c_str(void) const
 	{
-		return (const char*)d_stringU8.ptr();
+		return (const char*)d_stringU8.c_str();
 	}
 
 	const utf32* data(void)
 	{
 		build_utf32_buffer();
-		return d_stringU32.ptr();
+		return d_stringU32.c_str();
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -139,11 +139,6 @@ public:
 	size_type	max_size(void) const
 	{
 		return d_stringU8.max_size();
-	}
-	
-	size_type	max_length(void) const
-	{
-		return d_stringU8.max_length();
 	}
 
 	bool		empty(void) const
@@ -185,7 +180,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// Assignment Functions
 	//////////////////////////////////////////////////////////////////////////
-	StringAU8&	assign(const StringAU8& str, size_type str_idx = 0, size_type str_num = StringBase::npos)
+	StringAU8&	assign(const StringAU8& str, size_type str_idx = 0, size_type str_num = StringBase<utf8>::npos)
 	{
 		d_stringU8.assign(str.d_stringU8, str_idx, str_num);
 		return *this;
@@ -205,7 +200,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// Appending Functions
 	//////////////////////////////////////////////////////////////////////////
-	StringAU8& append(const StringAU8& str, size_type str_idx = 0, size_type str_num = StringBase::npos)
+	StringAU8& append(const StringAU8& str, size_type str_idx = 0, size_type str_num = StringBase<utf8>::npos)
 	{
 		d_stringU8.append(str.d_stringU8, str_idx, str_num);
 		return *this;
@@ -227,18 +222,18 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	StringAU8& replace(size_type idx, size_type len, const StringAU8& str)
 	{
-		return replace(idx, len, str, 0, StringBase::npos);
+		return replace(idx, len, str, 0, StringBase<utf8>::npos);
 	}
 
-	StringAU8& replace(size_type idx, size_type len, const StringAU8& str, size_type str_idx, size_type str_num = StringBase::npos)
+	StringAU8& replace(size_type idx, size_type len, const StringAU8& str, size_type str_idx, size_type str_num = StringBase<utf8>::npos)
 	{
 		if ((d_stringU8.length() < idx) || (str.d_stringU8.length() < str_idx))
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringX::StringAU8::replace().")); }
 
-		if (((str_idx + str_num) > str.d_stringU8.length()) || (str_num == StringBase::npos))
+		if (((str_idx + str_num) > str.d_stringU8.length()) || (str_num == StringBase<utf8>::npos))
 		{ str_num = str.d_stringU8.length() - str_idx; }
 
-		if (((len + idx) > d_stringU8.length()) || (len == StringBase::npos))
+		if (((len + idx) > d_stringU8.length()) || (len == StringBase<utf8>::npos))
 		{ len = d_stringU8.length() - idx; }
 
 		size_type newsz = d_stringU8.length() + str_num - len;
@@ -287,7 +282,7 @@ public:
 		return compare(0, d_stringU8.length(), str);
 	}
 
-	int		compare(size_type idx, size_type len, const StringAU8& str, size_type str_idx = 0, size_type str_len = StringBase::npos) const
+	int		compare(size_type idx, size_type len, const StringAU8& str, size_type str_idx = 0, size_type str_len = StringBase<utf8>::npos) const
 	{
 		if ((d_stringU8.length() < idx) || (str.d_stringU8.length() < str_idx))
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringAU8::compare().")); }
@@ -316,10 +311,10 @@ public:
 		if (d_stringU8.length() < idx)
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for XStringT::StringAU8::compare().")); }
 
-		if (str_cplen == StringBase::npos)
+		if (str_cplen == StringBase<utf8>::npos)
 		{ XSTRINGT_THROW(std::length_error("Length for utf8 encoded string can not be 'npos'.")); }
 
-		if ((len == StringBase::npos) || (idx + len > d_stringU8.length()))
+		if ((len == StringBase<utf8>::npos) || (idx + len > d_stringU8.length()))
 		{ len = d_stringU8.length() - idx; }
 
 		return strncmp((const char*)&d_stringU8.ptr()[idx], (const char*)utf8_str, (len < str_cplen) ? len : str_cplen);
@@ -328,7 +323,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// Substring
 	//////////////////////////////////////////////////////////////////////////
-	StringAU8	substr(size_type idx = 0, size_type len = StringBase::npos) const
+	StringAU8	substr(size_type idx = 0, size_type len = StringBase<utf8>::npos) const
 	{
 		if (d_stringU8.length() < idx)
 		{ XSTRINGT_THROW(std::out_of_range("Index is out of range for this XStringT::StringAU8::substr().")); }
