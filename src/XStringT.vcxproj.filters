@@ -13,36 +13,39 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="MXString">
+      <UniqueIdentifier>{7da7291d-4fc5-4635-98ce-f2d521cbbda6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="XStringT.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="MXStringBase.cpp">
+      <Filter>MXString</Filter>
     </ClCompile>
-    <ClCompile Include="XStringTranscoderT.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="MXString.cpp">
+      <Filter>MXString</Filter>
     </ClCompile>
-    <ClCompile Include="XStringBaseT.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="MXStringT.cpp">
+      <Filter>MXString</Filter>
     </ClCompile>
-    <ClCompile Include="XStringSwapperT.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="MXStringTranscoder.cpp">
+      <Filter>MXString</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="XStringT.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="MXStringBase.h">
+      <Filter>MXString</Filter>
     </ClInclude>
-    <ClInclude Include="XStringTranscoderT.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="MXString.h">
+      <Filter>MXString</Filter>
     </ClInclude>
-    <ClInclude Include="XStringBaseT.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="MXStringT.h">
+      <Filter>MXString</Filter>
     </ClInclude>
-    <ClInclude Include="XStringSwapperT.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="MXStringTranscoder.h">
+      <Filter>MXString</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

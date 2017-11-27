@@ -1,17 +1,28 @@
 /*
- * XStringTranscoderT.h
+ * MXStringTranscoderT.h
  *
  *  Created on: 2017年6月29日
  *      Author: silly
+ *
+ * Updated to 2017-11-27: 
+ * Base encode UTF32(LE/BE)
+ * Windows default : ANSI
+ * Windows process : 
+ *					ANSI->UTF16->UTF8->UTF32 (not use iconv library, need add utf8)
+ *					UTF32->UTF16->ANSI (use iconv library weak convert, only UTF32->ANSI)
+ * Linux/Unix default : UTF8
+ * Linux/Unix process :
+ *					UTF8->UTF32
+ *					UTF32->UTF8
  */
 
-#ifndef __XSTRINGT_TRANSCODER_H__
-#define __XSTRINGT_TRANSCODER_H__
+#ifndef __MXSTRING_TRANSCODER_H__
+#define __MXSTRING_TRANSCODER_H__
 
-#include "XStringT.h"
+#include "MXStringT.h"
 
 //
-namespace XStringT
+namespace MXString
 {
 
 /*-----------------------------------------------------
@@ -26,7 +37,6 @@ public:
     //! deletes a buffer returned from the stringToXXX function.
     virtual void		deleteANSIBuffer(const char* input) const		= 0;
     virtual void		deleteUTF16Buffer(const utf16* input) const		= 0;
-    virtual void		deleteUTF32Buffer(const utf32* input) const		= 0; 
 };
 
 /*-----------------------------------------------------
@@ -39,26 +49,17 @@ public:
     IconvStringTranscoder();
 
     // implement abstract interface
-	char*			stringToANSI(StringAU8& input) const;
-    utf16*			stringToUTF16(StringAU8& input) const;
-    utf32*			stringToUTF32(StringAU8& input) const;
+	char*			stringToANSI(StringX& input) const;
+    utf16*			stringToUTF16(StringX& input) const;
 
-	StringAU8		stringFromANSI(const char* input, StringBase::size_type len = StringBase::npos) const;
-    StringAU8		stringFromUTF16(const utf16* input, StringBase::size_type len = StringBase::npos) const;
-    StringAU8		stringFromUTF32(const utf32* input, StringBase::size_type len = StringBase::npos) const;
+	StringX			stringFromANSI(const char* input, StringX::size_type len = StringX::npos) const;
+    StringX			stringFromUTF16(const utf16* input, StringX::size_type len = StringX::npos) const;
 
     void			deleteANSIBuffer(const char* input) const;
     void			deleteUTF16Buffer(const utf16* input) const;
-    void			deleteUTF32Buffer(const utf32* input) const;
-
 private:
-	
-	//
-#if defined(_MSC_VER)
-	unsigned long	d_nLanguage;
-	char			d_szLanguage[LOCALE_NAME_MAX_LENGTH+1];
-#endif
 
+	//
 	__inline const char* UTF16PE(void)	const { return is_big_endian() ? "UTF-16BE" : "UTF-16LE"; };
 	__inline const char* UTF32PE(void)	const { return is_big_endian() ? "UTF-32BE" : "UTF-32LE"; };
 
@@ -75,6 +76,6 @@ private:
 	}
 };
 
-};//namespace XStringT
+};//namespace MXString
 
-#endif /* __XSTRINGT_TRANSCODER_H__ */
+#endif /* __MXSTRING_TRANSCODER_H__ */

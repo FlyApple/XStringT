@@ -1,15 +1,15 @@
 /*
- * XStringBaseT.cpp
+ * MXStringBase.cpp
  *
  *  Created on: 2017年6月29日
  *      Author: silly
  */
 
-#include "XStringBaseT.h"
+#include "MXStringBase.h"
 
 
 //
-namespace XStringT
+namespace MXString
 {
 
 }

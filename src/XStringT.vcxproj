@@ -83,16 +83,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="XStringBaseT.cpp" />
-    <ClCompile Include="XStringSwapperT.cpp" />
-    <ClCompile Include="XStringT.cpp" />
-    <ClCompile Include="XStringTranscoderT.cpp" />
+    <ClCompile Include="MXString.cpp" />
+    <ClCompile Include="MXStringBase.cpp" />
+    <ClCompile Include="MXStringT.cpp" />
+    <ClCompile Include="MXStringTranscoder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="XStringBaseT.h" />
-    <ClInclude Include="XStringSwapperT.h" />
-    <ClInclude Include="XStringT.h" />
-    <ClInclude Include="XStringTranscoderT.h" />
+    <ClInclude Include="MXString.h" />
+    <ClInclude Include="MXStringBase.h" />
+    <ClInclude Include="MXStringT.h" />
+    <ClInclude Include="MXStringTranscoder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
