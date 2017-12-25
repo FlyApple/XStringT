@@ -172,7 +172,7 @@ char* IconvStringTranscoder::stringToANSI(StringX& input) const
 	MXSTRING_DELETE_ARRAY_PT(dataW, utf16, lengthW+1);
 #else
 	utf8* result = MXSTRING_NEW_ARRAY_PT(utf8, length + 1);
-	input.stringU8().copy(result);
+	input.stringU8().copy(result, length);
 	result[length] = (utf8)(0);
 #endif
 	return (char*)result;
@@ -221,8 +221,8 @@ StringX IconvStringTranscoder::stringFromUTF16(const utf16* input, StringX::size
 	IconvHelper ich(UTF32PE(), UTF16PE());
 	return iconvTranscodeT<String, utf32, utf16>(ich, input, length);
 #else
-	IconvHelper ich(UTF32PE, UTF16PE());
-    return iconvTranscode<String, utf32, utf16>(ich, input, length);
+	IconvHelper ich(UTF32PE(), UTF16PE());
+    return iconvTranscodeT<String, utf32, utf16>(ich, input, length);
 #endif
 }
 

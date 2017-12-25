@@ -35,5 +35,9 @@ int main()
 	str1 = str1 + __MXSTRING_UNICODE_X("123456 ทดสอบข้อความ");
 	const char* cca = str1.c_str_ua();
 	const wchar_t* ccw = str1.c_str_uw();
+
+	printf(cca);
+	wprintf(ccw);
+
 	return 0;
 }

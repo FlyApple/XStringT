@@ -4,24 +4,24 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/XStringBaseT.cpp \
-../src/XStringSwapperT.cpp \
-../src/XStringT.cpp \
-../src/XStringTranscoderT.cpp \
+../src/MXString.cpp \
+../src/MXStringBase.cpp \
+../src/MXStringT.cpp \
+../src/MXStringTranscoder.cpp \
 ../src/main.cpp 
 
 OBJS += \
-./src/XStringBaseT.o \
-./src/XStringSwapperT.o \
-./src/XStringT.o \
-./src/XStringTranscoderT.o \
+./src/MXString.o \
+./src/MXStringBase.o \
+./src/MXStringT.o \
+./src/MXStringTranscoder.o \
 ./src/main.o 
 
 CPP_DEPS += \
-./src/XStringBaseT.d \
-./src/XStringSwapperT.d \
-./src/XStringT.d \
-./src/XStringTranscoderT.d \
+./src/MXString.d \
+./src/MXStringBase.d \
+./src/MXStringT.d \
+./src/MXStringTranscoder.d \
 ./src/main.d 
 
 

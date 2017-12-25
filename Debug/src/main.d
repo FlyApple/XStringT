@@ -1,10 +1,8 @@
-src/main.o: ../src/main.cpp ../src/XStringT.h ../src/XStringBaseT.h \
-  ../src/XStringTranscoderT.h ../src/XStringSwapperT.h
+src/main.o: ../src/main.cpp ../src/MXStringT.h ../src/MXString.h \
+  ../src/MXStringBase.h
 
-../src/XStringT.h:
+../src/MXStringT.h:
 
-../src/XStringBaseT.h:
+../src/MXString.h:
 
-../src/XStringTranscoderT.h:
-
-../src/XStringSwapperT.h:
+../src/MXStringBase.h:

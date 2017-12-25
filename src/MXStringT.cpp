@@ -40,7 +40,7 @@ namespace MXString
 #if defined(_MSC_VER)
 		StringX temp = d_transcoder->stringFromUTF16((utf16*)str.substr(str_idx, str_num).data());
 #else
-		StringX temp((utf32*)chars);
+		StringX temp(str.substr(str_idx, str_num));
 #endif
 		this->assign(temp);
 		return *this;
@@ -61,7 +61,7 @@ namespace MXString
 #if defined(_MSC_VER)
 		StringX temp = d_transcoder->stringFromUTF16((utf16*)str.substr(str_idx, str_num).data());
 #else
-		StringX temp((utf32*)chars);
+		StringX temp(str.substr(str_idx, str_num));
 #endif
 		this->append(temp);
 		return *this;
